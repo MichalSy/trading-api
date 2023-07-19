@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trading-api-application
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: 'https://github.com/MichalSy/argocd-deployments.git'
+    path: charts/dotnet-service
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+        - ../../apps/trading-api/values.yaml
+
+  destination: 
+    server: https://kubernetes.default.svc
+    namespace: argocd-deployments
+
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+    - CreateNamespace=true

@@ -1,0 +1,90 @@
+name: TaskScheduler-BuildDeploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - '.github/workflows/**'
+      - 'deploy/**'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: downcase REPO
+        run: |
+          echo "generate repo name in lowercase"
+          echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+          echo "generate package version number"
+          echo "APPVERSION=$(sed -n "s/\\s\{1,\}<Version>\([0-9]\{1,\}\.[0-9]\{1,\}\).*<\/Version>/\1/p" src/**/*.csproj).$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+          echo "APPNAME=${{ github.event.repository.name }}" >>${GITHUB_ENV}
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.100-preview.5.23303.2'
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build docker image
+        run: |
+          dotnet publish src/**/*.csproj --os linux --arch x64 --configuration Release /p:UseAppHost=false /t:PublishContainer \
+            -p:ContainerImageName=$REPO \
+            -p:ContainerImageTags=$APPVERSION
+
+      # - name: Publish to registry
+      #   run: |
+      #     dotnet publish src/**/*.csproj --os linux --arch x64 --configuration Release /p:UseAppHost=false /t:PublishContainer \
+      #       -p:ContainerImageName=$REPO \
+      #       -p:ContainerImageTags=$APPVERSION \
+      #       -p:ContainerRegistry=$REGISTRY
+      
+      - name: Tag and push docker image
+        run: |
+          docker tag $REPO:$APPVERSION $REGISTRY/$REPO:$APPVERSION
+          docker image push --all-tags $REGISTRY/$REPO
+          
+
+      - name: Checkout deployment repository
+        uses: actions/checkout@v3
+        with:
+          repository: "${{ github.repository_owner }}/argocd-deployments.git"
+          persist-credentials: true
+          token: ${{ secrets.GIT_TOKEN }}
+          ref: main
+          path: ./argocd-deployments
+
+      - name: Generate deploy values.yaml
+        run: |
+          mkdir -p argocd-deployments/apps/$APPNAME
+          echo "appName: $APPNAME" > argocd-deployments/apps/$APPNAME/values.yaml
+          echo "appVersion: $APPVERSION" >> argocd-deployments/apps/$APPNAME/values.yaml
+          cat ./deploy/values.yaml >> ./argocd-deployments/apps/$APPNAME/values.yaml
+          cat argocd-deployments/apps/$APPNAME/values.yaml
+
+      - name: Commit and push changes
+        run: |
+          cd argocd-deployments
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+          git config --global credential.helper cache
+          git add .
+          git commit -m "Update $APPNAME to $APPVERSION"
+          git push
