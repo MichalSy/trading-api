@@ -1,5 +1,3 @@
 replicaCount: 1
-secrets:
-  - name: NEO4J_SERVER
-  - name: NEO4J_USER
-  - name: NEO4J_PASSWORD
+bindSecrets:
+  neo4j: true
