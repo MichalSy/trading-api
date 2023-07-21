@@ -4,16 +4,16 @@ using TradingApi.Notifications;
 using TradingApi.Repositories.ZeroRealtime;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.RealtimeQuotes;
+namespace TradingApi.Manager.RealtimeQuotesStorage;
 
-public class RealtimeQuotesManager : IRealtimeQuotesManager, INotificationHandler<RealtimeQuoteReceived>
+public class RealtimeQuotesStorageManager : IRealtimeQuotesStorageManager, INotificationHandler<RealtimeQuoteReceived>
 {
     private readonly IZeroRealtimeRepository _zeroRealtimeRepository;
     private readonly IPublisher _publisher;
     private Dictionary<string, List<RealtimeQuote>> _cacheQuotes = new();
 
     [SetsRequiredMembers]
-    public RealtimeQuotesManager(IZeroRealtimeRepository zeroRealtimeRepository, IPublisher publisher)
+    public RealtimeQuotesStorageManager(IZeroRealtimeRepository zeroRealtimeRepository, IPublisher publisher)
     {
         _zeroRealtimeRepository = zeroRealtimeRepository;
         _publisher = publisher;
@@ -26,13 +26,14 @@ public class RealtimeQuotesManager : IRealtimeQuotesManager, INotificationHandle
         {
             var newList = new List<RealtimeQuote> { quote };
             _cacheQuotes.Add(quote.Isin, newList);
-            _publisher.Publish(new RealtimeQuotesCacheUpdated(newList));
+            _publisher.Publish(new RealtimeQuotesCacheUpdated(quote, null));
         }
         else
         {
             currentQuotes.RemoveAll(q => q.Timestamp < DateTime.UtcNow.AddHours(-2));
+            _publisher.Publish(new RealtimeQuotesCacheUpdated(quote, currentQuotes.ToArray()));
             currentQuotes.Add(quote);
-            _publisher.Publish(new RealtimeQuotesCacheUpdated(currentQuotes));
+            
         }
 
         return Task.CompletedTask;

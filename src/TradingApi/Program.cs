@@ -8,9 +8,10 @@ using Neo4j.Driver;
 using TradingApi.Repositories.ZeroRealtime;
 using TradingApi.Endpoints.ZeroApi;
 using TradingApi.Endpoints.ZeroRealtime;
-using TradingApi.Manager.RealtimeQuotes;
+using TradingApi.Manager.RealtimeQuotesStorage;
 using Microsoft.AspNetCore.Hosting;
 using MediatR.NotificationPublishers;
+using TradingApi.Manager.OrderSignalDetector;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -78,8 +79,8 @@ builder.Services.AddMediatR(cfg => {
 });
 
 builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>();
-builder.Services.AddSingleton<IRealtimeQuotesManager, RealtimeQuotesManager>();
-
+builder.Services.AddSingleton<IRealtimeQuotesStorageManager, RealtimeQuotesStorageManager>();
+builder.Services.AddSingleton<IOrderSignalDetectorManager, OrderSignalDetectorManager>();
 
 
 var app = builder.Build();
@@ -105,7 +106,7 @@ app.UseAuthorization();
 app.MapZeroEndpoints();
 app.MapZeroRealtimeEndpoints();
 
-app.Services.GetRequiredService<IRealtimeQuotesManager>()
+app.Services.GetRequiredService<IRealtimeQuotesStorageManager>()
     .StartAsync();
 
 app.Run();
