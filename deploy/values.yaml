@@ -1,3 +1,7 @@
 replicaCount: 1
 bindSecrets:
   neo4j: true
+secrets:
+  - name: ZERODIF_SERVER
+  - name: ZERODIF_USER
+  - name: ZERODIF_PASSWORD

@@ -1,4 +1,4 @@
-﻿namespace TradingApi.Endpoints.Zero.Models;
+﻿namespace TradingApi.Endpoints.ZeroApi.Models;
 
 public class LoginRequest
 {

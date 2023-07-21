@@ -1,11 +1,10 @@
 ﻿using Amazon.CognitoIdentityProvider;
 using Amazon.Extensions.CognitoAuthentication;
-using Microsoft.AspNetCore.Http;
 using System.Diagnostics.CodeAnalysis;
 
-namespace TradingApi.Repositories.Zero;
+namespace TradingApi.Repositories.ZeroApi;
 
-public class ZeroRepository : IZeroRepository
+public class ZeroApiRepository : IZeroApiRepository
 {
     private readonly string _awsPoolId;
     private readonly string _awsClientId;
@@ -17,7 +16,7 @@ public class ZeroRepository : IZeroRepository
     private readonly string _clientId = string.Empty;
 
     [SetsRequiredMembers]
-    public ZeroRepository(AmazonCognitoIdentityProviderClient providerClient, IConfiguration configuration, HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+    public ZeroApiRepository(AmazonCognitoIdentityProviderClient providerClient, IConfiguration configuration, HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
     {
         _providerClient = providerClient;
         _httpContextAccessor = httpContextAccessor;

@@ -1,6 +1,6 @@
-﻿namespace TradingApi.Repositories.Zero;
+﻿namespace TradingApi.Repositories.ZeroApi;
 
-public interface IZeroRepository
+public interface IZeroApiRepository
 {
     Task<object?> GetDepotPositionsAsync();
     Task<object?> GetWatchlistAsync();

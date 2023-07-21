@@ -1,13 +1,16 @@
-using TradingApi;
 using Amazon.CognitoIdentityProvider;
-using TradingApi.Repositories.Zero;
-using Microsoft.AspNetCore.OpenApi;
-using TradingApi.Endpoints.Zero;
+using TradingApi.Repositories.ZeroApi;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using TradingApi.Authentication;
 using System.Security.Claims;
-using Amazon.Runtime;
+using Neo4j.Driver;
+using TradingApi.Repositories.ZeroRealtime;
+using TradingApi.Endpoints.ZeroApi;
+using TradingApi.Endpoints.ZeroRealtime;
+using TradingApi.Manager.RealtimeQuotes;
+using Microsoft.AspNetCore.Hosting;
+using MediatR.NotificationPublishers;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -47,7 +50,7 @@ builder.Services.AddSwaggerGen(o =>
 builder.Services.AddSingleton(
     new AmazonCognitoIdentityProviderClient(new Amazon.Runtime.AnonymousAWSCredentials(), Amazon.RegionEndpoint.EUCentral1));
 
-builder.Services.AddScoped<IZeroRepository, ZeroRepository>();
+builder.Services.AddScoped<IZeroApiRepository, ZeroApiRepository>();
 builder.Services.AddHttpClient();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -59,6 +62,24 @@ builder.Services.AddAuthorization(o =>
     o.AddPolicy("ZeroTrade", policy => policy.RequireAuthenticatedUser()
     .RequireClaim(ClaimTypes.Name, "ZeroTrade"));
 });
+
+builder.Services.AddSingleton(
+    GraphDatabase.Driver(
+        builder.Configuration["NEO4J_SERVER"],
+        AuthTokens.Basic(builder.Configuration["NEO4J_USER"], builder.Configuration["NEO4J_PASSWORD"])
+    )
+);
+
+
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssemblyContaining<Program>();
+    cfg.NotificationPublisher = new TaskWhenAllPublisher();
+    cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher);
+});
+
+builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>();
+builder.Services.AddSingleton<IRealtimeQuotesManager, RealtimeQuotesManager>();
+
 
 
 var app = builder.Build();
@@ -82,6 +103,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapZeroEndpoints();
+app.MapZeroRealtimeEndpoints();
+
+app.Services.GetRequiredService<IRealtimeQuotesManager>()
+    .StartAsync();
 
 app.Run();
 

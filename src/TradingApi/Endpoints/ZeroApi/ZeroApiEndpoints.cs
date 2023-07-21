@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TradingApi.Endpoints.Zero.Models;
-using TradingApi.Repositories.Zero;
+using TradingApi.Endpoints.ZeroApi.Models;
+using TradingApi.Repositories.ZeroApi;
 
-namespace TradingApi.Endpoints.Zero;
+namespace TradingApi.Endpoints.ZeroApi;
 
 public static class ZeroEndpoints
 {
@@ -12,7 +12,7 @@ public static class ZeroEndpoints
             .WithTags("ZeroTrade")
             .WithOpenApi();
 
-        group.MapPost("/login", async (IZeroRepository repository, [FromBody] LoginRequest request) =>
+        group.MapPost("/login", async (IZeroApiRepository repository, [FromBody] LoginRequest request) =>
         {
             return await repository.LoginAsync(request.Username, request.Password);
         }).AllowAnonymous();
@@ -21,7 +21,7 @@ public static class ZeroEndpoints
         var watchlist = group.MapGroup("watchlist")
             .RequireAuthorization("ZeroTrade");
 
-        watchlist.MapGet("list", async ([FromServices] IZeroRepository zeroRepository) =>
+        watchlist.MapGet("list", async ([FromServices] IZeroApiRepository zeroRepository) =>
         {
             return await zeroRepository.GetWatchlistAsync();
         });
@@ -30,7 +30,7 @@ public static class ZeroEndpoints
         var depot = group.MapGroup("depot")
             .RequireAuthorization("ZeroTrade");
 
-        depot.MapGet("positions", async ([FromServices] IZeroRepository zeroRepository) =>
+        depot.MapGet("positions", async ([FromServices] IZeroApiRepository zeroRepository) =>
         {
             return await zeroRepository.GetDepotPositionsAsync();
         });
