@@ -1,6 +1,8 @@
-﻿namespace TradingApi.Manager.RealtimeQuotesStorage;
+﻿using TradingApi.Repositories.ZeroRealtime.Models;
+
+namespace TradingApi.Manager.RealtimeQuotesStorage;
 
 public interface IRealtimeQuotesStorageManager
 {
-    void StartAsync();
+    Task CaptureQuoteAsync(RealtimeQuote quote);
 }

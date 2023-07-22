@@ -1,20 +1,28 @@
 ﻿using MediatR;
 using System.Collections.Concurrent;
+using TradingApi.Communication.Commands;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
 using TradingApi.Manager.OrderSignalDetector.Models;
-using TradingApi.Notifications;
+using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.OrderSignalDetector;
 
-public class OrderSignalDetectorManager : IOrderSignalDetectorManager, INotificationHandler<RealtimeQuotesCacheUpdated>
+public class OrderSignalDetectorManager : IOrderSignalDetectorManager
 {
     private ConcurrentBag<OrderSignalJob> _loadedJobs = new();
     private readonly Dictionary<string, IOrderSignalDetector> _detectors;
+    private readonly ISender _sender;
 
-    public OrderSignalDetectorManager(IEnumerable<IOrderSignalDetector> detectors)
+    public OrderSignalDetectorManager(ISender sender, IEnumerable<IOrderSignalDetector> detectors)
     {
-        LoadAllOrderSignalJobsAsync();
         _detectors = detectors.ToDictionary(d => d.Name);
+        _sender = sender;
+    }
+
+    public async Task StartAsync()
+    {
+        await LoadAllOrderSignalJobsAsync();
+
     }
 
     private Task LoadAllOrderSignalJobsAsync()
@@ -28,18 +36,24 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager, INotifica
                 { "FinishOrderAfterDifferenceInPercent", 3f }
             })
         });
+
+        // register all instruments for realtime quotes
+        foreach (var isin in _loadedJobs.Select(j => j.Isin).Distinct())
+        {
+            _sender.Send(new SubscribeIsinCommand(isin));
+        }
         return Task.CompletedTask;
     }
 
-    public async Task Handle(RealtimeQuotesCacheUpdated notification, CancellationToken cancellationToken)
+    public async Task ExecuteDetecotsAsync(RealtimeQuote LastQuote, IEnumerable<RealtimeQuote>? ChachedQuotes)
     {
-        var affectedJobs = _loadedJobs.Where(j => j.Isin.Equals(notification.LastQuote.Isin));
+        var affectedJobs = _loadedJobs.Where(j => j.Isin.Equals(LastQuote.Isin));
         await Parallel.ForEachAsync(
-            affectedJobs, 
-            new ParallelOptions { MaxDegreeOfParallelism = 10 }, 
+            affectedJobs,
+            new ParallelOptions { MaxDegreeOfParallelism = 10 },
             async (job, token) =>
-        {
-            await _detectors[job.DetectorName].DetectAsync(job.Settings, notification.LastQuote, notification.ChachedQuotes);
-        });
+            {
+                await _detectors[job.DetectorName].DetectAsync(job.Settings, LastQuote, ChachedQuotes);
+            });
     }
 }

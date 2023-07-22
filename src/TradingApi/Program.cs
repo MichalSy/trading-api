@@ -77,6 +77,7 @@ builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssemblyContaining<Program>();
     cfg.NotificationPublisher = new TaskWhenAllPublisher();
     cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher);
+    cfg.Lifetime = ServiceLifetime.Singleton;
 });
 
 builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>();
@@ -111,7 +112,7 @@ app.UseAuthorization();
 app.MapZeroEndpoints();
 app.MapZeroRealtimeEndpoints();
 
-app.Services.GetRequiredService<IRealtimeQuotesStorageManager>()
+await app.Services.GetRequiredService<IOrderSignalDetectorManager>()
     .StartAsync();
 
 app.Run();

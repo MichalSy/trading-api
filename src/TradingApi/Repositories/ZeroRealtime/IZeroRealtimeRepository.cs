@@ -2,6 +2,6 @@
 
 public interface IZeroRealtimeRepository
 {
-    void SubscribeIsinAsync(string isin);
-    void UnsubscribeIsinAsync(string isin);
+    Task SubscribeIsinAsync(string isin);
+    Task UnsubscribeIsinAsync(string isin);
 }

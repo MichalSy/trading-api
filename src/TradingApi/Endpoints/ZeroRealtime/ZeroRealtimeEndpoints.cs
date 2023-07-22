@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TradingApi.Repositories.ZeroRealtime;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using TradingApi.Communication.Commands;
+using TradingApi.Communication.NotificationHandler;
+using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Endpoints.ZeroRealtime;
 
@@ -13,9 +16,14 @@ public static class ZeroRealtimeEndpoints
             .AllowAnonymous()
             .WithOpenApi();
 
-        group.MapGet("/subscribe", (IZeroRealtimeRepository repository, [FromQuery] string isin) =>
+        group.MapGet("/subscribe", (ISender sender, [FromQuery] string isin) =>
         {
-            repository.SubscribeIsinAsync(isin);
+            sender.Send(new SubscribeIsinCommand(isin));
         });
+
+        group.MapPost("/simulate-quote", (IPublisher publisher, [FromBody] RealtimeQuote request) =>
+        {
+            publisher.Publish(new RealtimeQuoteReceived(request));
+        }).AllowAnonymous();
     }
 }

@@ -8,12 +8,13 @@ using PushTechnology.ClientInterface.Data.JSON;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using TradingApi.Notifications;
+using TradingApi.Communication.NotificationHandler;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Repositories.ZeroRealtime;
 
-public class ZeroRealtimeRepository : IZeroRealtimeRepository, IValueStream<IJSON>
+public class ZeroRealtimeRepository 
+    : IZeroRealtimeRepository, IValueStream<IJSON>
 {
     private readonly PushTechnology.ClientInterface.Client.Session.ISession _session;
     private readonly ILogger<ZeroRealtimeRepository> _logger;
@@ -35,14 +36,16 @@ public class ZeroRealtimeRepository : IZeroRealtimeRepository, IValueStream<IJSO
         //_session.Topics.SubscribeAsync(">/tradeticker/lastx");
     }
 
-    public void SubscribeIsinAsync(string isin)
+    public Task SubscribeIsinAsync(string isin)
     {
         _session.Topics.SubscribeAsync($">wp/{isin}");
+        return Task.CompletedTask;
     }
 
-    public void UnsubscribeIsinAsync(string isin)
+    public Task UnsubscribeIsinAsync(string isin)
     {
         _session.Topics.UnsubscribeAsync($">wp/{isin}");
+        return Task.CompletedTask;
     }
 
     public void OnClose() { }
