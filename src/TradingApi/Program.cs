@@ -12,6 +12,8 @@ using TradingApi.Manager.RealtimeQuotesStorage;
 using Microsoft.AspNetCore.Hosting;
 using MediatR.NotificationPublishers;
 using TradingApi.Manager.OrderSignalDetector;
+using TradingApi.Manager.OrderSignalDetector.Detectors;
+using System.Reflection;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -80,8 +82,12 @@ builder.Services.AddMediatR(cfg => {
 
 builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>();
 builder.Services.AddSingleton<IRealtimeQuotesStorageManager, RealtimeQuotesStorageManager>();
-builder.Services.AddSingleton<IOrderSignalDetectorManager, OrderSignalDetectorManager>();
 
+// find all classes with interface of IOrderSignalDetector and register as singleton with DepedencyInject without abstract classes
+Assembly.GetExecutingAssembly().GetTypes()
+    .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Contains(typeof(IOrderSignalDetector)))
+    .ToList().ForEach(t => builder.Services.AddSingleton(typeof(IOrderSignalDetector), t));
+builder.Services.AddSingleton<IOrderSignalDetectorManager, OrderSignalDetectorManager>();
 
 var app = builder.Build();
 

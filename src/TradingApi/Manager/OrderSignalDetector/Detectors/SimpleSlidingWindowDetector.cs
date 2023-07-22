@@ -5,9 +5,9 @@ namespace TradingApi.Manager.OrderSignalDetector.Detectors;
 
 public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
 {
-    protected override string DisplayName => "SlidingWindow (Simple)";
+    public override string DisplayName => "SlidingWindow (Simple)";
 
-    protected override Task DetectAsync(Dictionary<string, JsonValue> settings, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
+    public override Task DetectAsync(Dictionary<string, object> settings, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
     {
 
         return Task.CompletedTask;

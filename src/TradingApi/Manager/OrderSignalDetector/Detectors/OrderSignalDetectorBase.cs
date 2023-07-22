@@ -3,10 +3,11 @@ using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.OrderSignalDetector.Detectors;
 
-public abstract class OrderSignalDetectorBase
+public abstract class OrderSignalDetectorBase : IOrderSignalDetector
 {
-    protected virtual string Name => GetType().Name.Replace("Detector", string.Empty);
-    protected virtual string DisplayName => Name;
+    public virtual string Name => GetType().Name.Replace("Detector", string.Empty);
 
-    protected abstract Task DetectAsync(Dictionary<string, JsonValue> settings, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes);
+    public virtual string DisplayName => Name;
+
+    public abstract Task DetectAsync(Dictionary<string, object> settings, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes);
 }
