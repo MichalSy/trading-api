@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using System.Collections.Concurrent;
-using System.Text.Json.Nodes;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Notifications;
@@ -32,13 +31,15 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager, INotifica
         return Task.CompletedTask;
     }
 
-    public Task Handle(RealtimeQuotesCacheUpdated notification, CancellationToken cancellationToken)
+    public async Task Handle(RealtimeQuotesCacheUpdated notification, CancellationToken cancellationToken)
     {
         var affectedJobs = _loadedJobs.Where(j => j.Isin.Equals(notification.LastQuote.Isin));
-        foreach (var job in affectedJobs.ToList())
+        await Parallel.ForEachAsync(
+            affectedJobs, 
+            new ParallelOptions { MaxDegreeOfParallelism = 10 }, 
+            async (job, token) =>
         {
-            _detectors[job.DetectorName].DetectAsync(job.Settings, notification.LastQuote, notification.ChachedQuotes);
-        }
-        return Task.CompletedTask;
+            await _detectors[job.DetectorName].DetectAsync(job.Settings, notification.LastQuote, notification.ChachedQuotes);
+        });
     }
 }

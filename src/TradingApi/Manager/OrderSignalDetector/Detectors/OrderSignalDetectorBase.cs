@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Nodes;
-using TradingApi.Repositories.ZeroRealtime.Models;
+﻿using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.OrderSignalDetector.Detectors;
 

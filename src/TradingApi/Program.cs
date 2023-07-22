@@ -9,7 +9,6 @@ using TradingApi.Repositories.ZeroRealtime;
 using TradingApi.Endpoints.ZeroApi;
 using TradingApi.Endpoints.ZeroRealtime;
 using TradingApi.Manager.RealtimeQuotesStorage;
-using Microsoft.AspNetCore.Hosting;
 using MediatR.NotificationPublishers;
 using TradingApi.Manager.OrderSignalDetector;
 using TradingApi.Manager.OrderSignalDetector.Detectors;

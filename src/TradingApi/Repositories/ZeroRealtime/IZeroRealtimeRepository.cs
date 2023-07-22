@@ -1,6 +1,4 @@
-﻿using TradingApi.Repositories.ZeroRealtime.Models;
-
-namespace TradingApi.Repositories.ZeroRealtime;
+﻿namespace TradingApi.Repositories.ZeroRealtime;
 
 public interface IZeroRealtimeRepository
 {

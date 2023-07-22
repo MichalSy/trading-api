@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Nodes;
-
-namespace TradingApi.Manager.OrderSignalDetector.Models;
+﻿namespace TradingApi.Manager.OrderSignalDetector.Models;
 
 public record OrderSignalJob(
     string Isin, 
