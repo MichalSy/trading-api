@@ -14,6 +14,7 @@ using TradingApi.Manager.OrderSignalDetector;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
 using System.Reflection;
 using TradingApi.Manager.OrderSignal;
+using TradingApi;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -98,7 +99,7 @@ builder.Services.AddSingleton<IOrderSignalDetectorManager, OrderSignalDetectorMa
 builder.Services.AddSingleton<IOrderSignalManager, OrderSignalManager>();
 
 
-
+builder.Services.AddHostedService<ManagerBackgroundService>();
 
 var app = builder.Build();
 
@@ -113,9 +114,6 @@ app.UseAuthorization();
 
 app.MapZeroEndpoints();
 app.MapZeroRealtimeEndpoints();
-
-await app.Services.GetRequiredService<IOrderSignalDetectorManager>()
-    .StartAsync();
 
 app.Run();
 

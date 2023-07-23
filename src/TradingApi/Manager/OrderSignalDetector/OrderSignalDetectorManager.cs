@@ -41,7 +41,11 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                 }, 
                 new OrderSignalSettings
                 {
-                    BuySettings = new(),
+                    BuySettings = new()
+                    {
+                        ValueInEur = 500,
+                        RoundUpValueInEur = true,
+                    },
                     SellSettings = new()
                     {
                         DifferenceInPercent = 4

@@ -6,6 +6,17 @@ namespace TradingApi.Manager.OrderSignal;
 public class OrderSignalManager : IOrderSignalManager
 {
 
+    public OrderSignalManager()
+    {
+        
+    }
+
+    public Task StartAsync()
+    {
+        return Task.CompletedTask;
+
+    }
+
     public Task CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob orderSignalJob, RealtimeQuote lastQuote)
     {
 
