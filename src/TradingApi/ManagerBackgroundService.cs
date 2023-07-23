@@ -17,7 +17,7 @@ public class ManagerBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _orderSignalManager.StartAsync();
+        await _orderSignalManager.StartAsync(stoppingToken);
         await _orderSignalDetectorManager.StartAsync();
     }
 }

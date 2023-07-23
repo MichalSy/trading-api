@@ -5,7 +5,7 @@ namespace TradingApi.Manager.OrderSignal;
 
 public interface IOrderSignalManager
 {
-    Task CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob orderSignalJob, RealtimeQuote lastQuote);
-    Task StartAsync();
+    Task CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote);
+    Task StartAsync(CancellationToken stoppingToken);
     Task UpdateOrderSignalsAsync(RealtimeQuote LastQuote);
 }
