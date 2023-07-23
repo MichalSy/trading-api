@@ -1,10 +1,12 @@
-﻿namespace TradingApi.Manager.OrderSignalDetector.Models;
+﻿using TradingApi.Manager.OrderSignal.Models;
+
+namespace TradingApi.Manager.OrderSignalDetector.Models;
 
 public record OrderSignalDetectorJob(
     string Isin,
     string DetectorName,
     Dictionary<string, object> DetectorSettings,
-    OrderSignalFinishCondition FinishCondition
+    OrderSignalSettings OrderSignalSettings
 )
 {
     public T GetDetectorSettingValue<T>(string key, T defaultValue = default)

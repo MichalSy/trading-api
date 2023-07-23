@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using TradingApi.Communication.Commands;
 using TradingApi.Manager.OrderSignal;
+using TradingApi.Manager.OrderSignal.Models;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
@@ -38,9 +39,13 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                     { "WindowTimeInSecs", 20 },
                     { "BidDifferenceFromWindowStartInPercent", 1f },
                 }, 
-                new OrderSignalFinishCondition
+                new OrderSignalSettings
                 {
-                    DifferenceInPercent = 4
+                    BuySettings = new(),
+                    SellSettings = new()
+                    {
+                        DifferenceInPercent = 4
+                    }
                 }
             )
         });
