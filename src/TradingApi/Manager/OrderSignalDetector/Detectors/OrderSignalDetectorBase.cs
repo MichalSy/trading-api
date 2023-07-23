@@ -1,4 +1,5 @@
-﻿using TradingApi.Repositories.ZeroRealtime.Models;
+﻿using TradingApi.Manager.OrderSignalDetector.Models;
+using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.OrderSignalDetector.Detectors;
 
@@ -8,5 +9,5 @@ public abstract class OrderSignalDetectorBase : IOrderSignalDetector
 
     public virtual string DisplayName => Name;
 
-    public abstract Task DetectAsync(Dictionary<string, object> settings, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes);
+    public abstract Task DetectAsync(OrderSignalDetectorJob orderSignalJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes);
 }

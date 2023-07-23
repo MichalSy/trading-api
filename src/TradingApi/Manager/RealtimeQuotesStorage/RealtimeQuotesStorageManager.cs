@@ -19,6 +19,10 @@ public class RealtimeQuotesStorageManager : IRealtimeQuotesStorageManager
 
     public Task CaptureQuoteAsync(RealtimeQuote quote)
     {
+        // ignore quotes from different day
+        if (quote.Timestamp.Date != DateTime.UtcNow.Date)
+            return Task.CompletedTask;
+
         if (!_cacheQuotes.TryGetValue(quote.Isin, out var currentQuotes))
         {
             var newList = new List<RealtimeQuote> { quote };

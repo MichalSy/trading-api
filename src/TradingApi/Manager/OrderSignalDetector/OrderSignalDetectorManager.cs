@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using System.Collections.Concurrent;
 using TradingApi.Communication.Commands;
+using TradingApi.Manager.OrderSignal;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
@@ -9,14 +10,14 @@ namespace TradingApi.Manager.OrderSignalDetector;
 
 public class OrderSignalDetectorManager : IOrderSignalDetectorManager
 {
-    private ConcurrentBag<OrderSignalJob> _loadedJobs = new();
+    private ConcurrentBag<OrderSignalDetectorJob> _loadedJobs = new();
     private readonly Dictionary<string, IOrderSignalDetector> _detectors;
     private readonly ISender _sender;
 
     public OrderSignalDetectorManager(ISender sender, IEnumerable<IOrderSignalDetector> detectors)
     {
-        _detectors = detectors.ToDictionary(d => d.Name);
         _sender = sender;
+        _detectors = detectors.ToDictionary(d => d.Name);
     }
 
     public async Task StartAsync()
@@ -27,14 +28,21 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
 
     private Task LoadAllOrderSignalJobsAsync()
     {
-        _loadedJobs = new(new OrderSignalJob[]
+        _loadedJobs = new(new OrderSignalDetectorJob[]
         {
-            new OrderSignalJob("US88160R1014", "SimpleSlidingWindow", new()
-            {
-                { "WindowTimeInSecs", 20 },
-                { "DifferenceToWindowStartInPercent", 1f },
-                { "FinishOrderAfterDifferenceInPercent", 3f }
-            })
+            new OrderSignalDetectorJob(
+                "US88160R1014", 
+                "SimpleSlidingWindow", 
+                new()
+                {
+                    { "WindowTimeInSecs", 20 },
+                    { "BidDifferenceFromWindowStartInPercent", 1f },
+                }, 
+                new OrderSignalFinishCondition
+                {
+                    DifferenceInPercent = 4
+                }
+            )
         });
 
         // register all instruments for realtime quotes
@@ -53,7 +61,7 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
             new ParallelOptions { MaxDegreeOfParallelism = 10 },
             async (job, token) =>
             {
-                await _detectors[job.DetectorName].DetectAsync(job.Settings, LastQuote, ChachedQuotes);
+                await _detectors[job.DetectorName].DetectAsync(job, LastQuote, ChachedQuotes);
             });
     }
 }

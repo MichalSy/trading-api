@@ -13,12 +13,11 @@ using MediatR.NotificationPublishers;
 using TradingApi.Manager.OrderSignalDetector;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
 using System.Reflection;
+using TradingApi.Manager.OrderSignal;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-
-
 
 builder.Services.AddSwaggerGen(o =>
 {
@@ -49,12 +48,7 @@ builder.Services.AddSwaggerGen(o =>
     });
 });
 
-builder.Services.AddSingleton(
-    new AmazonCognitoIdentityProviderClient(new Amazon.Runtime.AnonymousAWSCredentials(), Amazon.RegionEndpoint.EUCentral1));
-
-builder.Services.AddScoped<IZeroApiRepository, ZeroApiRepository>();
 builder.Services.AddHttpClient();
-
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddAuthentication()
@@ -65,14 +59,9 @@ builder.Services.AddAuthorization(o =>
     .RequireClaim(ClaimTypes.Name, "ZeroTrade"));
 });
 
-builder.Services.AddSingleton(
-    GraphDatabase.Driver(
-        builder.Configuration["NEO4J_SERVER"],
-        AuthTokens.Basic(builder.Configuration["NEO4J_USER"], builder.Configuration["NEO4J_PASSWORD"])
-    )
-);
 
 
+// Intern Communication
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssemblyContaining<Program>();
     cfg.NotificationPublisher = new TaskWhenAllPublisher();
@@ -80,7 +69,25 @@ builder.Services.AddMediatR(cfg => {
     cfg.Lifetime = ServiceLifetime.Singleton;
 });
 
+
+
+// Repository
+builder.Services.AddSingleton(
+    new AmazonCognitoIdentityProviderClient(new Amazon.Runtime.AnonymousAWSCredentials(), Amazon.RegionEndpoint.EUCentral1));
+builder.Services.AddScoped<IZeroApiRepository, ZeroApiRepository>();
+builder.Services.AddSingleton(
+    GraphDatabase.Driver(
+        builder.Configuration["NEO4J_SERVER"],
+        AuthTokens.Basic(builder.Configuration["NEO4J_USER"], builder.Configuration["NEO4J_PASSWORD"])
+    )
+);
 builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>();
+
+
+
+
+
+// Manager
 builder.Services.AddSingleton<IRealtimeQuotesStorageManager, RealtimeQuotesStorageManager>();
 
 // find all classes with interface of IOrderSignalDetector and register as singleton with DepedencyInject without abstract classes
@@ -88,23 +95,18 @@ Assembly.GetExecutingAssembly().GetTypes()
     .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Contains(typeof(IOrderSignalDetector)))
     .ToList().ForEach(t => builder.Services.AddSingleton(typeof(IOrderSignalDetector), t));
 builder.Services.AddSingleton<IOrderSignalDetectorManager, OrderSignalDetectorManager>();
+builder.Services.AddSingleton<IOrderSignalManager, OrderSignalManager>();
+
+
+
 
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-
-//var todosApi = app.MapGroup("/todos");
-//todosApi.MapGet("/", () => sampleTodos);
-//todosApi.MapGet("/{id}", (int id) =>
-//    sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-//        ? Results.Ok(todo)
-//        : Results.NotFound());
 
 app.UseAuthentication();
 app.UseAuthorization();
