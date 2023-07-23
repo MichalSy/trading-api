@@ -7,4 +7,5 @@ public interface IOrderSignalManager
 {
     Task CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob orderSignalJob, RealtimeQuote lastQuote);
     Task StartAsync();
+    Task UpdateOrderSignalsAsync(RealtimeQuote LastQuote);
 }

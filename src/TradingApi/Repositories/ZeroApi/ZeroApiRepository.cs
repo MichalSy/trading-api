@@ -1,6 +1,5 @@
 ﻿using Amazon.CognitoIdentityProvider;
 using Amazon.Extensions.CognitoAuthentication;
-using System.Diagnostics.CodeAnalysis;
 
 namespace TradingApi.Repositories.ZeroApi;
 

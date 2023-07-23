@@ -1,6 +1,4 @@
-﻿using MediatR;
-using System.Diagnostics.CodeAnalysis;
-using TradingApi.Manager.OrderSignal;
+﻿using TradingApi.Manager.OrderSignal;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 

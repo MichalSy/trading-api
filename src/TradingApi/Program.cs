@@ -54,11 +54,9 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, ZeroTradeAuthenticationHandler>("ZeroTrade", null);
-builder.Services.AddAuthorization(o =>
-{
-    o.AddPolicy("ZeroTrade", policy => policy.RequireAuthenticatedUser()
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("ZeroTrade", policy => policy.RequireAuthenticatedUser()
     .RequireClaim(ClaimTypes.Name, "ZeroTrade"));
-});
 
 
 

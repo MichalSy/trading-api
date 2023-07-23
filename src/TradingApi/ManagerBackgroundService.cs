@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using TradingApi.Manager.OrderSignal;
+﻿using TradingApi.Manager.OrderSignal;
 using TradingApi.Manager.OrderSignalDetector;
 
 namespace TradingApi;

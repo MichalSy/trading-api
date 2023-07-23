@@ -1,5 +1,4 @@
-﻿using MediatR;
-using TradingApi.Communication.RequestHandler;
+﻿using TradingApi.Communication.RequestHandler;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 

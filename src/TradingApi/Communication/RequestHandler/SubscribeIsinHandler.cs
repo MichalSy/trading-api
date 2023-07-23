@@ -1,6 +1,4 @@
-﻿using MediatR;
-using System.Diagnostics.CodeAnalysis;
-using TradingApi.Repositories.ZeroRealtime;
+﻿using TradingApi.Repositories.ZeroRealtime;
 
 namespace TradingApi.Communication.Commands;
 

@@ -1,13 +1,9 @@
-﻿using MediatR;
-using System.Diagnostics.CodeAnalysis;
+﻿using TradingApi.Communication.Notification;
 using TradingApi.Manager.OrderSignalDetector;
-using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Communication.NotificationHandler;
 
-public record RealtimeQuotesCacheUpdated(RealtimeQuote LastQuote, IEnumerable<RealtimeQuote>? ChachedQuotes) : INotification;
-
-public class RealtimeQuotesCacheUpdatedHandler : INotificationHandler<RealtimeQuotesCacheUpdated>
+public class RealtimeQuotesCacheUpdatedHandler : INotificationHandler<RealtimeQuotesCacheUpdatedNotification>
 {
     private readonly IOrderSignalDetectorManager _signalDetectorManager;
 
@@ -16,8 +12,8 @@ public class RealtimeQuotesCacheUpdatedHandler : INotificationHandler<RealtimeQu
     {
         _signalDetectorManager = signalDetectorManager;
     }
-    public async Task Handle(RealtimeQuotesCacheUpdated notification, CancellationToken cancellationToken)
+    public async Task Handle(RealtimeQuotesCacheUpdatedNotification notification, CancellationToken cancellationToken)
     {
-        await _signalDetectorManager.ExecuteDetecotsAsync(notification.LastQuote, notification.ChachedQuotes);
+        await _signalDetectorManager.ExecuteDetectorsAsync(notification.LastQuote, notification.ChachedQuotes);
     }
 }

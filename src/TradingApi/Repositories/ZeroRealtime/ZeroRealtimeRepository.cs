@@ -1,14 +1,12 @@
-﻿using MediatR;
-using PushTechnology.ClientInterface.Client.Callbacks;
+﻿using PushTechnology.ClientInterface.Client.Callbacks;
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Features.Topics;
 using PushTechnology.ClientInterface.Client.Topics.Details;
 using PushTechnology.ClientInterface.Data.JSON;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using TradingApi.Communication.NotificationHandler;
+using TradingApi.Communication.Notification;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Repositories.ZeroRealtime;
@@ -75,7 +73,7 @@ public class ZeroRealtimeRepository
               quote["a"].GetValue<decimal>()
             );
 
-            _publisher.Publish(new RealtimeQuoteReceived(result));
+            _publisher.Publish(new RealtimeQuoteReceivedNotification(result));
         }
     }
 }

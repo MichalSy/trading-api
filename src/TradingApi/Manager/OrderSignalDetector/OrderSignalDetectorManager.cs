@@ -1,7 +1,5 @@
-﻿using MediatR;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using TradingApi.Communication.Commands;
-using TradingApi.Manager.OrderSignal;
 using TradingApi.Manager.OrderSignal.Models;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
 using TradingApi.Manager.OrderSignalDetector.Models;
@@ -62,7 +60,7 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
         return Task.CompletedTask;
     }
 
-    public async Task ExecuteDetecotsAsync(RealtimeQuote LastQuote, IEnumerable<RealtimeQuote>? ChachedQuotes)
+    public async Task ExecuteDetectorsAsync(RealtimeQuote LastQuote, IEnumerable<RealtimeQuote>? ChachedQuotes)
     {
         var affectedJobs = _loadedJobs.Where(j => j.Isin.Equals(LastQuote.Isin));
         await Parallel.ForEachAsync(

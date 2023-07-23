@@ -4,6 +4,6 @@ namespace TradingApi.Manager.OrderSignalDetector;
 
 public interface IOrderSignalDetectorManager
 {
-    Task ExecuteDetecotsAsync(RealtimeQuote LastQuote, IEnumerable<RealtimeQuote>? ChachedQuotes);
+    Task ExecuteDetectorsAsync(RealtimeQuote LastQuote, IEnumerable<RealtimeQuote>? ChachedQuotes);
     Task StartAsync();
 }

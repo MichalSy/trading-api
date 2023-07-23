@@ -1,7 +1,4 @@
-﻿using MediatR;
-using System.Diagnostics.CodeAnalysis;
-using TradingApi.Communication.NotificationHandler;
-using TradingApi.Repositories.ZeroRealtime;
+﻿using TradingApi.Communication.Notification;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.RealtimeQuotesStorage;
@@ -27,12 +24,12 @@ public class RealtimeQuotesStorageManager : IRealtimeQuotesStorageManager
         {
             var newList = new List<RealtimeQuote> { quote };
             _cacheQuotes.Add(quote.Isin, newList);
-            _publisher.Publish(new RealtimeQuotesCacheUpdated(quote, null));
+            _publisher.Publish(new RealtimeQuotesCacheUpdatedNotification(quote, null));
         }
         else
         {
             currentQuotes.RemoveAll(q => q.Timestamp < DateTime.UtcNow.AddHours(-2));
-            _publisher.Publish(new RealtimeQuotesCacheUpdated(quote, currentQuotes.ToArray()));
+            _publisher.Publish(new RealtimeQuotesCacheUpdatedNotification(quote, currentQuotes.ToArray()));
             currentQuotes.Add(quote);
         }
         return Task.CompletedTask;
