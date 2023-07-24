@@ -1,5 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using TradingApi.Communication.Commands;
+using TradingApi.Communication.Request;
 using TradingApi.Manager.OrderSignal.Models;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
 using TradingApi.Manager.OrderSignalDetector.Models;
@@ -46,7 +46,8 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                     },
                     SellSettings = new()
                     {
-                        DifferenceInPercent = 4
+                        DifferencePositiveInPercent = 1m,
+                        DifferenceNegativeInPercent = 0.4m
                     }
                 }
             )
@@ -55,7 +56,7 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
         // register all instruments for realtime quotes
         foreach (var isin in _loadedJobs.Select(j => j.Isin).Distinct())
         {
-            _sender.Send(new SubscribeIsinCommand(isin));
+            _sender.Send(new SubscribeIsinRequest(isin));
         }
         return Task.CompletedTask;
     }

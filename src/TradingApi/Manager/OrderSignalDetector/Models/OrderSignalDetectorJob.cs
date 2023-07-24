@@ -9,6 +9,8 @@ public record OrderSignalDetectorJob(
     OrderSignalSettings OrderSignalSettings
 )
 {
+    public Guid Id { get; } = Guid.NewGuid();
+
     public T GetDetectorSettingValue<T>(string key, T defaultValue = default)
         where T : struct
     {

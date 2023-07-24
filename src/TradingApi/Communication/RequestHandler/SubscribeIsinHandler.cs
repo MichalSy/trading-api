@@ -1,11 +1,9 @@
-﻿using TradingApi.Repositories.ZeroRealtime;
+﻿using TradingApi.Communication.Request;
+using TradingApi.Repositories.ZeroRealtime;
 
 namespace TradingApi.Communication.Commands;
 
-public record SubscribeIsinCommand(string Isin)
-    : IRequest;
-
-public class SubscribeIsinHandler : IRequestHandler<SubscribeIsinCommand>
+public class SubscribeIsinHandler : IRequestHandler<SubscribeIsinRequest>
 {
     private readonly IZeroRealtimeRepository _zeroRealtimeRepository;
 
@@ -15,7 +13,7 @@ public class SubscribeIsinHandler : IRequestHandler<SubscribeIsinCommand>
         _zeroRealtimeRepository = zeroRealtimeRepository;
     }
 
-    public async Task Handle(SubscribeIsinCommand request, CancellationToken cancellationToken)
+    public async Task Handle(SubscribeIsinRequest request, CancellationToken cancellationToken)
     {
         await _zeroRealtimeRepository.SubscribeIsinAsync(request.Isin);
     }

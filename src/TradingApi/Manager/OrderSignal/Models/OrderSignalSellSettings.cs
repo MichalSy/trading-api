@@ -2,6 +2,7 @@
 
 public class OrderSignalSellSettings
 {
-    public decimal? DifferenceInPercent { get; init; } = null;
+    public decimal? DifferencePositiveInPercent { get; init; } = null;
+    public decimal? DifferenceNegativeInPercent { get; init; } = null;
     public TimeSpan? MaxDuration { get; init; } = null;
 }

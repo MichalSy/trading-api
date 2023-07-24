@@ -1,14 +1,9 @@
-﻿using TradingApi.Manager.OrderSignal;
-using TradingApi.Manager.OrderSignalDetector.Models;
-using TradingApi.Repositories.ZeroRealtime.Models;
+﻿using TradingApi.Communication.Request;
+using TradingApi.Manager.OrderSignal;
 
 namespace TradingApi.Communication.RequestHandler;
 
-
-public record CreateOrderSignalCommand(OrderSignalDetectorJob OrderSignalDetectorJob, RealtimeQuote LastQuote)
-    : IRequest;
-
-public class CreateOrderSignalHandler : IRequestHandler<CreateOrderSignalCommand>
+public class CreateOrderSignalHandler : IRequestHandler<CreateOrderSignalRequest>
 {
     private readonly IOrderSignalManager _orderSignalManager;
 
@@ -18,7 +13,7 @@ public class CreateOrderSignalHandler : IRequestHandler<CreateOrderSignalCommand
         _orderSignalManager = orderSignalManager;
     }
 
-    public Task Handle(CreateOrderSignalCommand request, CancellationToken cancellationToken)
+    public Task Handle(CreateOrderSignalRequest request, CancellationToken cancellationToken)
     {
         return _orderSignalManager.CreateOrderSignalFromDetectorJobAsync(request.OrderSignalDetectorJob, request.LastQuote);
     }

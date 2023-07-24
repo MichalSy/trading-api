@@ -1,5 +1,4 @@
-﻿using Amazon.CognitoIdentityProvider.Model.Internal.MarshallTransformations;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using TradingApi.Manager.OrderSignal.Models;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
@@ -37,6 +36,11 @@ public class OrderSignalManager : IOrderSignalManager
         return Task.CompletedTask;
     }
 
+    public Task<IEnumerable<OrderSignalJob>> GetActiveOrderSignalsForDetectorJobIdAsync(Guid detectorJobid)
+    {
+        return Task.FromResult(_orderSignals.Where(o => o.DetectorJob.Id.Equals(detectorJobid)));
+    }
+
     public async Task UpdateOrderSignalsAsync(RealtimeQuote lastQuote)
     {
         var affectedJobs = _orderSignals.Where(o => o.Isin.Equals(lastQuote.Isin) && !o.IsClosed);
@@ -63,4 +67,6 @@ public class OrderSignalManager : IOrderSignalManager
     {
         return Task.CompletedTask;
     }
+
+    
 }

@@ -1,4 +1,5 @@
-﻿using TradingApi.Communication.RequestHandler;
+﻿using MediatR;
+using TradingApi.Communication.Request;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
@@ -17,7 +18,7 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
         _sender = sender;
     }
 
-    public override Task DetectAsync(OrderSignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
+    public override async Task DetectAsync(OrderSignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
     {
         var windowTime = orderSignalDetectorJob.GetDetectorSettingValue("WindowTimeInSecs", 30);
         var needDifferenceFromStart = orderSignalDetectorJob.GetDetectorSettingValue("BidDifferenceFromWindowStartInPercent", 5f);
@@ -38,12 +39,20 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
                 lastQuote.Timestamp,
                 differencePercent);
 
-            if (differencePercent >= needDifferenceFromStart)
-            {
-                _sender.Send(new CreateOrderSignalCommand(orderSignalDetectorJob, lastQuote));
-            }
-        }
+            // ignore difference under needDifferenceFromStart
+            if (differencePercent < needDifferenceFromStart)
+                return;
 
-        return Task.CompletedTask;
+            // ignore signal if another signal exists for this job
+            var jobs = await _sender.Send(new GetOrderSignalsForDetectorJobRequest(orderSignalDetectorJob.Id));
+            if (jobs?.Any() == true)
+            {
+                _logger.LogInformation("Can't create new signal, another one is still running");
+                return;
+            }
+            
+            // create new signal :)
+            _ = _sender.Send(new CreateOrderSignalRequest(orderSignalDetectorJob, lastQuote));
+        }
     }
 }
