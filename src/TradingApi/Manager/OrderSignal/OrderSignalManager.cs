@@ -107,7 +107,7 @@ public class OrderSignalManager : IOrderSignalManager
 
         _orderSignals.Add(newJob);
 
-        _logger.LogInformation("Buy Stock Count: {StockCount} with Price: {BuyPrice}", stockAmount, lastQuote.Ask);
+        _logger.LogInformation("Buy {StockCount} x {BuyPrice:N2}€ = {TotalValue:N2}€", stockAmount, lastQuote.Ask, stockAmount * lastQuote.Ask);
         return Task.CompletedTask;
     }
 
@@ -116,11 +116,13 @@ public class OrderSignalManager : IOrderSignalManager
         if (signalJob.BuyQuote is null || signalJob.BuyedStockCount is null)
             return Task.CompletedTask;
 
-        _logger.LogInformation("Verkaufen {a}, kaufen {b}", lastQuote.Bid * signalJob.BuyedStockCount.Value, signalJob.BuyQuote.Ask * signalJob.BuyedStockCount.Value);
+        //_logger.LogInformation("Verkaufen {a}, kaufen {b}", lastQuote.Bid * signalJob.BuyedStockCount.Value, signalJob.BuyQuote.Ask * signalJob.BuyedStockCount.Value);
         var diffValue = (lastQuote.Bid * signalJob.BuyedStockCount.Value) - (signalJob.BuyQuote.Ask * signalJob.BuyedStockCount.Value);
-        _logger.LogInformation("Sell Stockcount: {StockCount} with Price: {SellPrice}, Result: {diffValue:N2}€", signalJob.BuyedStockCount, lastQuote.Bid, diffValue);
-
-        
+        _logger.LogInformation("Sell {StockCount} x {SellPrice:N2}€ = {TotalValue:N2}€, Result: {diffValue:N2}€", 
+            signalJob.BuyedStockCount, 
+            lastQuote.Bid, 
+            signalJob.BuyedStockCount * lastQuote.Bid, 
+            diffValue);
 
         signalJob.SellStockAmount(lastQuote);
 
