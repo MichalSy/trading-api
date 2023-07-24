@@ -18,10 +18,14 @@ public class OrderSignalJob
 
     public string Isin => DetectorJob.Isin;
 
-    public DateTime OrderDate { get; } = DateTime.UtcNow;
+    public DateTime CreatedDate { get; } = DateTime.UtcNow;
 
-    private bool _isClosed = false;
-    public bool IsClosed => _isClosed;
+    private DateTime? _closedDate;
+    public DateTime? ClosedDate => _closedDate;
+
+    
+
+    public bool IsClosed => _closedDate is { };
 
     public void BuyStockCount(RealtimeQuote realtimeQuote, int stockCount = 1)
     {
@@ -32,6 +36,6 @@ public class OrderSignalJob
     public void SellStockAmount(RealtimeQuote realtimeQuote)
     {
         _sellQuote = realtimeQuote;
-        _isClosed = true;
+        _closedDate = DateTime.UtcNow;
     }
 }

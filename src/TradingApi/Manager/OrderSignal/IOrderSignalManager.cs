@@ -6,8 +6,8 @@ namespace TradingApi.Manager.OrderSignal;
 
 public interface IOrderSignalManager
 {
-    Task CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote);
-    Task<IEnumerable<OrderSignalJob>> GetActiveOrderSignalsForDetectorJobIdAsync(Guid detectorJobid);
+    Task<bool> CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote);
+    Task<OrderSignalJob?> GetLastOrderSignalsForDetectorJobIdAsync(Guid detectorJobid);
     Task StartAsync(CancellationToken stoppingToken);
     Task UpdateOrderSignalsAsync(RealtimeQuote LastQuote);
 }

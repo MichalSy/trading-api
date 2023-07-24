@@ -34,8 +34,8 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                 "SimpleSlidingWindow", 
                 new()
                 {
-                    { "WindowTimeInSecs", 40 },
-                    { "BidDifferenceFromWindowStartInPercent", .05f },
+                    { "WindowTimeInSecs", 120 },
+                    { "BidDifferenceFromWindowStartInPercent", .1f },
                 }, 
                 new OrderSignalSettings
                 {
@@ -43,11 +43,12 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                     {
                         ValueInEur = 500,
                         RoundUpValueInEur = true,
+                        CoolDownAfterLastSellInSecs = 40
                     },
                     SellSettings = new()
                     {
-                        DifferencePositiveInPercent = 0.25m,
-                        DifferenceNegativeInPercent = -0.4m
+                        DifferencePositiveInPercent = 0.5m,
+                        DifferenceNegativeInPercent = -0.3m
                     }
                 }
             )
@@ -69,7 +70,7 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
             new ParallelOptions { MaxDegreeOfParallelism = 10 },
             async (job, token) =>
             {
-                await _detectors[job.DetectorName].DetectAsync(job, LastQuote, ChachedQuotes);
+                await _detectors[job.DetectorName].StartDetectAsync(job, LastQuote, ChachedQuotes);
             });
     }
 }

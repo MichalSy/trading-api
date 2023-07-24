@@ -1,5 +1,4 @@
-﻿using Amazon.CognitoIdentityProvider.Model.Internal.MarshallTransformations;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using TradingApi.Manager.OrderSignal.Models;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
@@ -24,14 +23,14 @@ public class OrderSignalManager : IOrderSignalManager
         return Task.CompletedTask;
     }
 
-    public async Task CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote)
+    public async Task<bool> CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote)
     {
-        await BuyStockAsync(detectorJob, lastQuote);
+        return await BuyStockAsync(detectorJob, lastQuote);
     }
 
-    public Task<IEnumerable<OrderSignalJob>> GetActiveOrderSignalsForDetectorJobIdAsync(Guid detectorJobid)
+    public Task<OrderSignalJob?> GetLastOrderSignalsForDetectorJobIdAsync(Guid detectorJobid)
     {
-        return Task.FromResult(_orderSignals.Where(o => o.DetectorJob.Id.Equals(detectorJobid)));
+        return Task.FromResult(_orderSignals.Where(o => o.DetectorJob.Id.Equals(detectorJobid)).OrderByDescending(o => o.CreatedDate).FirstOrDefault());
     }
 
     public async Task UpdateOrderSignalsAsync(RealtimeQuote lastQuote)
@@ -81,8 +80,10 @@ public class OrderSignalManager : IOrderSignalManager
         }
     }
 
-    private Task BuyStockAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote)
+    private async Task<bool> BuyStockAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote)
     {
+        await Task.Delay(0);
+
         var stockAmount = 0;
         if (detectorJob.OrderSignalSettings.BuySettings.ValueInEur >= 0)
         {
@@ -97,7 +98,7 @@ public class OrderSignalManager : IOrderSignalManager
         }
 
         if (stockAmount <= 0)
-            return Task.CompletedTask;
+            return false;
 
         var newJob = new OrderSignalJob
         {
@@ -108,7 +109,7 @@ public class OrderSignalManager : IOrderSignalManager
         _orderSignals.Add(newJob);
 
         _logger.LogInformation("Buy {StockCount} x {BuyPrice:N2}€ = {TotalValue:N2}€", stockAmount, lastQuote.Ask, stockAmount * lastQuote.Ask);
-        return Task.CompletedTask;
+        return true;
     }
 
     private Task SellStockAsync(OrderSignalJob signalJob, RealtimeQuote lastQuote)
