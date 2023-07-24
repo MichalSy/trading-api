@@ -34,8 +34,8 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                 "SimpleSlidingWindow", 
                 new()
                 {
-                    { "WindowTimeInSecs", 120 },
-                    { "BidDifferenceFromWindowStartInPercent", .1f },
+                    { "WindowTimeInSecs", 240 },
+                    { "BidDifferenceFromWindowStartInPercent", .25f },
                 }, 
                 new OrderSignalSettings
                 {
@@ -47,8 +47,8 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                     },
                     SellSettings = new()
                     {
-                        DifferencePositiveInPercent = 0.5m,
-                        DifferenceNegativeInPercent = -0.3m
+                        DifferencePositiveInPercent = 0.7m,
+                        DifferenceNegativeInPercent = -0.4m
                     }
                 }
             )
