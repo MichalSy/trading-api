@@ -6,12 +6,14 @@ namespace TradingApi.Manager.OrderSignalDetector.Detectors;
 
 public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
 {
+    private readonly ILogger<SimpleSlidingWindowDetector> _logger;
     private readonly ISender _sender;
 
     public override string DisplayName => "SlidingWindow (Simple)";
 
-    public SimpleSlidingWindowDetector(ISender sender)
+    public SimpleSlidingWindowDetector(ILogger<SimpleSlidingWindowDetector> logger, ISender sender)
     {
+        _logger = logger;
         _sender = sender;
     }
 
@@ -29,6 +31,12 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
         if (lastQuoteBeforeWindow is { })
         {
             var differencePercent = (float)(lastQuote.Bid / lastQuoteBeforeWindow.Bid * 100 - 100);
+            _logger.LogInformation("Start quote: {startQuoteBid} ({startQuoteTimestamp}), Last quote: {lastQuoteBid} ({lastQuoteTimestamp}) -> Difference percent: {differencePercent}",
+                lastQuoteBeforeWindow.Bid,
+                lastQuoteBeforeWindow.Timestamp,
+                lastQuote.Bid,
+                lastQuote.Timestamp,
+                differencePercent);
 
             if (differencePercent >= needDifferenceFromStart)
             {

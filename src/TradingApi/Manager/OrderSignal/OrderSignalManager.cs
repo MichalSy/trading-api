@@ -9,10 +9,12 @@ namespace TradingApi.Manager.OrderSignal;
 public class OrderSignalManager : IOrderSignalManager
 {
     private ConcurrentBag<OrderSignalJob> _orderSignals = new();
+    private readonly ILogger<OrderSignalManager> _logger;
 
-    public OrderSignalManager()
+    [SetsRequiredMembers]
+    public OrderSignalManager(ILogger<OrderSignalManager> logger)
     {
-        
+        _logger = logger;
     }
 
     public Task StartAsync(CancellationToken stoppingToken)
@@ -29,6 +31,8 @@ public class OrderSignalManager : IOrderSignalManager
             DetectorJob = detectorJob,
             BuyQuote = lastQuote
         });
+
+        _logger.LogInformation("Create OrderSignal");
 
         return Task.CompletedTask;
     }
