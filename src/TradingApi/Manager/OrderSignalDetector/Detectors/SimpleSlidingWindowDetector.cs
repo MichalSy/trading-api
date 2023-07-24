@@ -32,7 +32,7 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
         if (lastQuoteBeforeWindow is { })
         {
             var differencePercent = (float)(lastQuote.Bid / lastQuoteBeforeWindow.Bid * 100 - 100);
-            _logger.LogInformation("Start quote: {startQuoteBid} ({startQuoteTimestamp}), Last quote: {lastQuoteBid} ({lastQuoteTimestamp}) -> Difference percent: {differencePercent}",
+            _logger.LogTrace("Start quote: {startQuoteBid} ({startQuoteTimestamp}), Last quote: {lastQuoteBid} ({lastQuoteTimestamp}) -> Difference percent: {differencePercent:N3}",
                 lastQuoteBeforeWindow.Bid,
                 lastQuoteBeforeWindow.Timestamp,
                 lastQuote.Bid,
@@ -47,7 +47,7 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
             var jobs = await _sender.Send(new GetOrderSignalsForDetectorJobRequest(orderSignalDetectorJob.Id));
             if (jobs?.Any() == true)
             {
-                _logger.LogInformation("Can't create new signal, another one is still running");
+                _logger.LogTrace("Can't create new signal, another one is still running");
                 return;
             }
             

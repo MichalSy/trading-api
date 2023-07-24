@@ -46,8 +46,8 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                     },
                     SellSettings = new()
                     {
-                        DifferencePositiveInPercent = 1m,
-                        DifferenceNegativeInPercent = 0.4m
+                        DifferencePositiveInPercent = 0.25m,
+                        DifferenceNegativeInPercent = -0.4m
                     }
                 }
             )

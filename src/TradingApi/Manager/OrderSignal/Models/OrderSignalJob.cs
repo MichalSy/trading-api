@@ -7,13 +7,31 @@ public class OrderSignalJob
 {
     public required OrderSignalDetectorJob DetectorJob { get; init; }
 
-    public required RealtimeQuote BuyQuote { get; init; }
+    private RealtimeQuote? _buyQuote;
+    public RealtimeQuote? BuyQuote => _buyQuote;
+
+    private int? _buyedStockCount = 0;
+    public int? BuyedStockCount => _buyedStockCount;
+
+    private RealtimeQuote? _sellQuote;
+    public RealtimeQuote? SellQuote => _sellQuote;
 
     public string Isin => DetectorJob.Isin;
 
     public DateTime OrderDate { get; } = DateTime.UtcNow;
 
-    public bool IsClosed { get; set; }
+    private bool _isClosed = false;
+    public bool IsClosed => _isClosed;
 
-    
+    public void BuyStockCount(RealtimeQuote realtimeQuote, int stockCount = 1)
+    {
+        _buyQuote = realtimeQuote;
+        _buyedStockCount = stockCount;
+    }
+
+    public void SellStockAmount(RealtimeQuote realtimeQuote)
+    {
+        _sellQuote = realtimeQuote;
+        _isClosed = true;
+    }
 }
