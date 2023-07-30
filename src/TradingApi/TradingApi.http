@@ -9,3 +9,29 @@ GET {{TradingApi_HostAddress}}/todos/1
 Accept: application/json
 
 ###
+
+
+POST http://sytko.de:2480/api/v1/command/trading-api-dev
+Accept: application/json
+Authorization: Basic cm9vdDpwYXNzd29yZA==
+
+{"language":"sql","command":"select FROM Person","limit":25,"profileExecution":"basic","serializer":"records"}: 
+
+###
+
+POST http://sytko.de:2480/api/v1/command/trading-api-dev
+Accept: application/json
+Authorization: Basic cm9vdDpwYXNzd29yZA==
+
+{"language":"cypher","command":"match(p)\nmatch(p2)\nreturn *","limit":25,"profileExecution":"basic","serializer":"records"}
+
+
+
+
+
+
+
+#SELECT 
+#FROM ( TRAVERSE out("hasQuote") 
+#FROM (SELECT FROM Instrument WHERE isin = 'abc') )
+#WHERE @type = "Quote" AND created > '2023-01-01'

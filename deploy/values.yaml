@@ -1,7 +1,9 @@
 replicaCount: 1
-bindSecrets:
-  neo4j: true
 secrets:
   - name: ZERODIF_SERVER
   - name: ZERODIF_USER
   - name: ZERODIF_PASSWORD
+  - name: ARCADEDB_HOST
+  - name: ARCADEDB_USER
+  - name: ARCADEDB_PASSWORD
+  - name: ARCADEDB_DATABASE
