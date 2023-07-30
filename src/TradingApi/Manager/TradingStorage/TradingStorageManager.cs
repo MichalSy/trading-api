@@ -35,7 +35,8 @@ public class TradingStorageManager : ITradingStorageManager
         await connection.ExecuteSqlScriptAsync("""
             create vertex type Instrument if not exists;
             create property Instrument.Isin if not exists string (Mandatory true, NotNull true, Readonly true);
-            create property Instrument.Name if not exists string (Mandatory true, NotNull true, Default NoName);
+            create property Instrument.Name if not exists string;
+            create property Instrument.Description if not exists string;
             create index if not exists on Instrument (Isin) unique;
             """);
 
@@ -59,7 +60,7 @@ public class TradingStorageManager : ITradingStorageManager
         var connection = _arcadeDbFactory.CreateConnection();
 
         var response = await connection.ExecuteSqlScriptAsync("""
-            let $quote = insert into Quote SET Time = :timestamp, Bid = :bid, Ask = :ask;
+            let $quote = CREATE VERTEX Quote SET Time = :timestamp, Bid = :bid, Ask = :ask;
             let $instrument = SELECT FROM Instrument WHERE Isin = :isin;
             CREATE EDGE QuoteHistory FROM $instrument TO $quote;
             return $quote;
@@ -68,6 +69,20 @@ public class TradingStorageManager : ITradingStorageManager
         );
 
         var dbResult = await response.Content.ReadFromJsonAsync<ArcadeDbResultResponse<QuoteEntityDBO>>();
+        return dbResult?.Result.FirstOrDefault();
+    }
+
+    public async Task<InstrumentEntityDBO?> CreateOrUpdateInstrumentInDatabaseAsync(InstrumentDTO instrument)
+    {
+        var connection = _arcadeDbFactory.CreateConnection();
+
+        var response = await connection.ExecuteSqlScriptAsync("""
+            UPDATE Instrument SET Isin = :isin UPSERT RETURN AFTER WHERE Isin = :isin
+            """,
+            instrument
+        );
+
+        var dbResult = await response.Content.ReadFromJsonAsync<ArcadeDbResultResponse<InstrumentEntityDBO>>();
         return dbResult?.Result.FirstOrDefault();
     }
 }

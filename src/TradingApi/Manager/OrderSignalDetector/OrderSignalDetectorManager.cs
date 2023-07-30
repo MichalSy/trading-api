@@ -21,11 +21,11 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
 
     public async Task StartAsync()
     {
-        await LoadAllOrderSignalJobsAsync();
+        await LoadAllOrderSignalDetectorJobsAsync();
 
     }
 
-    private Task LoadAllOrderSignalJobsAsync()
+    private Task LoadAllOrderSignalDetectorJobsAsync()
     {
         _loadedJobs = new(new OrderSignalDetectorJob[]
         {

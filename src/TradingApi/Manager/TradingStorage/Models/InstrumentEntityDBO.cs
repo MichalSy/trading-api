@@ -4,6 +4,6 @@ namespace TradingApi.Manager.TradingStorage.Models;
 
 public record InstrumentEntityDBO(
     string Isin,
-    string Name,
-    string Description
+    string? Name,
+    string? Description
 ) : EntityDBO;
