@@ -1,4 +1,5 @@
 replicaCount: 1
+bindSecrets:
 secrets:
   - name: ZERODIF_SERVER
   - name: ZERODIF_USER
