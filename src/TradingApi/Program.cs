@@ -1,21 +1,21 @@
 using Amazon.CognitoIdentityProvider;
-using TradingApi.Repositories.ZeroApi;
-using Microsoft.OpenApi.Models;
+using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.Authentication;
-using TradingApi.Authentication;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Security.Claims;
-using TradingApi.Repositories.ZeroRealtime;
+using TradingApi;
+using TradingApi.Authentication;
 using TradingApi.Endpoints.ZeroApi;
 using TradingApi.Endpoints.ZeroRealtime;
-using TradingApi.Manager.RealtimeQuotesStorage;
-using MediatR.NotificationPublishers;
+using TradingApi.Manager.OrderSignal;
 using TradingApi.Manager.OrderSignalDetector;
 using TradingApi.Manager.OrderSignalDetector.Detectors;
-using System.Reflection;
-using TradingApi.Manager.OrderSignal;
-using TradingApi;
-using TradingApi.Repositories.ArcadeDb;
+using TradingApi.Manager.RealtimeQuotesStorage;
 using TradingApi.Manager.TradingStorage;
+using TradingApi.Repositories.MongoDb;
+using TradingApi.Repositories.ZeroApi;
+using TradingApi.Repositories.ZeroRealtime;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -62,7 +62,8 @@ builder.Services.AddAuthorizationBuilder()
 
 
 // Intern Communication
-builder.Services.AddMediatR(cfg => {
+builder.Services.AddMediatR(cfg =>
+{
     cfg.RegisterServicesFromAssemblyContaining<Program>();
     cfg.NotificationPublisher = new TaskWhenAllPublisher();
     cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher);
@@ -78,14 +79,7 @@ builder.Services.AddScoped<IZeroApiRepository, ZeroApiRepository>();
 builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>();
 
 
-builder.Services.AddArcadeDb((services, c) =>
-{
-    c.Host = builder.Configuration["ARCADEDB_HOST"] ?? throw new Exception("ARCADEDB_HOST Env is missing");
-    c.Username = builder.Configuration["ARCADEDB_USER"] ?? throw new Exception("ARCADEDB_USER Env is missing");
-    c.Password = builder.Configuration["ARCADEDB_PASSWORD"] ?? throw new Exception("ARCADEDB_PASSWORD Env is missing");
-    c.Database = builder.Configuration["ARCADEDB_DATABASE"] ?? throw new Exception("ARCADEDB_DATABASE Env is missing");
-});
-
+builder.Services.AddMongoDb();
 
 
 // Manager

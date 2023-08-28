@@ -1,4 +1,5 @@
-﻿using TradingApi.Repositories.ArcadeDb.Models;
+﻿
+using TradingApi.Repositories.MongoDb.Models;
 
 namespace TradingApi.Manager.TradingStorage.Models;
 
