@@ -1,18 +1,16 @@
 using Amazon.CognitoIdentityProvider;
-using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 using System.Security.Claims;
 using TradingApi;
 using TradingApi.Authentication;
 using TradingApi.Endpoints.ZeroApi;
 using TradingApi.Endpoints.ZeroRealtime;
-using TradingApi.Manager.OrderSignal;
-using TradingApi.Manager.OrderSignalDetector;
-using TradingApi.Manager.OrderSignalDetector.Detectors;
-using TradingApi.Manager.RealtimeQuotesStorage;
-using TradingApi.Manager.TradingStorage;
+using TradingApi.Manager.RealtimeQuotes;
+using TradingApi.Manager.Storage.InstrumentStorage;
+using TradingApi.Manager.Storage.OrderSignal;
+using TradingApi.Manager.Storage.OrderSignalDetector;
+using TradingApi.Manager.Storage.TradingStorage;
 using TradingApi.Repositories.MongoDb;
 using TradingApi.Repositories.ZeroApi;
 using TradingApi.Repositories.ZeroRealtime;
@@ -59,18 +57,7 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("ZeroTrade", policy => policy.RequireAuthenticatedUser()
     .RequireClaim(ClaimTypes.Name, "ZeroTrade"));
 
-
-
-// Intern Communication
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssemblyContaining<Program>();
-    cfg.NotificationPublisher = new TaskWhenAllPublisher();
-    cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher);
-    cfg.Lifetime = ServiceLifetime.Singleton;
-});
-
-
+builder.Services.AddMongoDb();
 
 // Repository
 builder.Services.AddSingleton(
@@ -78,20 +65,12 @@ builder.Services.AddSingleton(
 builder.Services.AddScoped<IZeroApiRepository, ZeroApiRepository>();
 builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>();
 
-
-builder.Services.AddMongoDb();
-
-
 // Manager
-builder.Services.AddSingleton<IRealtimeQuotesStorageManager, RealtimeQuotesStorageManager>();
-
-// find all classes with interface of IOrderSignalDetector and register as singleton with DepedencyInject without abstract classes
-Assembly.GetExecutingAssembly().GetTypes()
-    .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Contains(typeof(IOrderSignalDetector)))
-    .ToList().ForEach(t => builder.Services.AddSingleton(typeof(IOrderSignalDetector), t));
 builder.Services.AddSingleton<IOrderSignalDetectorManager, OrderSignalDetectorManager>();
 builder.Services.AddSingleton<IOrderSignalManager, OrderSignalManager>();
+builder.Services.AddSingleton<IInstrumentStorageManager, InstrumentStorageManager>();
 builder.Services.AddSingleton<ITradingStorageManager, TradingStorageManager>();
+builder.Services.AddSingleton<IRealtimeQuotesManager, RealtimeQuotesManager>();
 
 
 builder.Services.AddHostedService<StartupService>();

@@ -16,7 +16,6 @@
   <ItemGroup>
     <PackageReference Include="Amazon.Extensions.CognitoAuthentication" Version="2.5.0" />
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.201.17" />
-    <PackageReference Include="MediatR" Version="12.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0-*" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
     <PackageReference Include="MongoDB.Driver" Version="2.21.0" />
@@ -26,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Communication\" />
     <Folder Include="Repositories\ZeroApi\Models\" />
   </ItemGroup>
 

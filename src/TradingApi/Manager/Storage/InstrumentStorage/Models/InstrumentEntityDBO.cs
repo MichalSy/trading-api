@@ -1,6 +1,6 @@
 ﻿using TradingApi.Repositories.MongoDb.Models;
 
-namespace TradingApi.Manager.TradingStorage.Models;
+namespace TradingApi.Manager.Storage.TradingStorage.Models;
 
 public record InstrumentEntityDBO(
     string Isin,

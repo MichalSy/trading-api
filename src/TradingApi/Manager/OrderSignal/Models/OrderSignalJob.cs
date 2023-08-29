@@ -1,7 +1,7 @@
-﻿using TradingApi.Manager.OrderSignalDetector.Models;
+﻿using TradingApi.Manager.Storage.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.OrderSignal.Models;
+namespace TradingApi.Manager.Storage.OrderSignal.Models;
 
 public class OrderSignalJob
 {

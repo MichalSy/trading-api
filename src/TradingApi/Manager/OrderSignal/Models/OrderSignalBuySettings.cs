@@ -1,4 +1,4 @@
-﻿namespace TradingApi.Manager.OrderSignal.Models;
+﻿namespace TradingApi.Manager.Storage.OrderSignal.Models;
 
 public class OrderSignalBuySettings
 {

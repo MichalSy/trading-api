@@ -1,6 +1,6 @@
-﻿using TradingApi.Manager.OrderSignal.Models;
+﻿using TradingApi.Manager.Storage.OrderSignal.Models;
 
-namespace TradingApi.Manager.OrderSignalDetector.Models;
+namespace TradingApi.Manager.Storage.OrderSignalDetector.Models;
 
 public record OrderSignalDetectorJob(
     string Isin,

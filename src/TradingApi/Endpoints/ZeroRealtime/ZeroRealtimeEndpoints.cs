@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TradingApi.Communication.Notification;
-using TradingApi.Communication.Request;
 using TradingApi.Endpoints.ZeroRealtime.Models;
+using TradingApi.Manager.RealtimeQuotes;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Endpoints.ZeroRealtime;
@@ -16,19 +15,19 @@ public static class ZeroRealtimeEndpoints
             .AllowAnonymous()
             .WithOpenApi();
 
-        group.MapGet("/subscribe", (ISender sender, [FromQuery] string isin) =>
+        group.MapGet("/subscribe", (IRealtimeQuotesManager realtimeQuotesManager, [FromQuery] string isin) =>
         {
-            sender.Send(new SubscribeIsinRequest(isin));
+            realtimeQuotesManager.SubscribeIsinAsync(isin);
         });
 
-        group.MapPost("/simulate-quote", (IPublisher publisher, [FromBody] SimulateQuoteRequest request) =>
+        group.MapPost("/simulate-quote", (IRealtimeQuotesManager realtimeQuotesManager, [FromBody] SimulateQuoteRequest request) =>
         {
-            publisher.Publish(new RealtimeQuoteReceivedNotification(new RealtimeQuote(
+            realtimeQuotesManager.RealtimeQuoteChangedReceived(new RealtimeQuote(
                 request.Isin,
                 request.Timestamp,
                 request.Bid,
                 request.Ask
-            )));
+            ));
         }).AllowAnonymous();
     }
 }

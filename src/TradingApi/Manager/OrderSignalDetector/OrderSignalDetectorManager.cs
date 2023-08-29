@@ -1,21 +1,21 @@
 ﻿using System.Collections.Concurrent;
-using TradingApi.Communication.Request;
-using TradingApi.Manager.OrderSignal.Models;
-using TradingApi.Manager.OrderSignalDetector.Detectors;
-using TradingApi.Manager.OrderSignalDetector.Models;
+using TradingApi.Manager.RealtimeQuotes;
+using TradingApi.Manager.Storage.OrderSignal.Models;
+using TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
+using TradingApi.Manager.Storage.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.OrderSignalDetector;
+namespace TradingApi.Manager.Storage.OrderSignalDetector;
 
 public class OrderSignalDetectorManager : IOrderSignalDetectorManager
 {
     private ConcurrentBag<OrderSignalDetectorJob> _loadedJobs = new();
     private readonly Dictionary<string, IOrderSignalDetector> _detectors;
-    private readonly ISender _sender;
+    private readonly IRealtimeQuotesManager _realtimeQuotesManager;
 
-    public OrderSignalDetectorManager(ISender sender, IEnumerable<IOrderSignalDetector> detectors)
+    public OrderSignalDetectorManager(IEnumerable<IOrderSignalDetector> detectors, IRealtimeQuotesManager realtimeQuotesManager)
     {
-        _sender = sender;
+        _realtimeQuotesManager = realtimeQuotesManager;
         _detectors = detectors.ToDictionary(d => d.Name);
     }
 
@@ -25,18 +25,18 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
 
     }
 
-    private Task LoadAllOrderSignalDetectorJobsAsync()
+    private async Task LoadAllOrderSignalDetectorJobsAsync()
     {
         _loadedJobs = new(new OrderSignalDetectorJob[]
         {
             new OrderSignalDetectorJob(
-                "US88160R1014", 
-                "SimpleSlidingWindow", 
+                "US88160R1014",
+                "SimpleSlidingWindow",
                 new()
                 {
                     { "WindowTimeInSecs", 60 },
                     { "BidDifferenceFromWindowStartInPercent", .15f },
-                }, 
+                },
                 new OrderSignalSettings
                 {
                     BuySettings = new()
@@ -57,9 +57,8 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
         // register all instruments for realtime quotes
         foreach (var isin in _loadedJobs.Select(j => j.Isin).Distinct())
         {
-            _sender.Send(new SubscribeIsinRequest(isin));
+            await _realtimeQuotesManager.SubscribeIsinAsync(isin);
         }
-        return Task.CompletedTask;
     }
 
     public async Task ExecuteDetectorsAsync(RealtimeQuote LastQuote, IEnumerable<RealtimeQuote>? ChachedQuotes)

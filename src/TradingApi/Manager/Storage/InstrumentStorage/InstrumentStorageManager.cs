@@ -1,17 +1,17 @@
 ﻿using MongoDB.Driver;
-using TradingApi.Manager.TradingStorage.Models;
+using TradingApi.Manager.Storage.InstrumentStorage.Models;
+using TradingApi.Manager.Storage.TradingStorage.Models;
 using TradingApi.Repositories.MongoDb;
-using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.TradingStorage;
+namespace TradingApi.Manager.Storage.InstrumentStorage;
 
-public class TradingStorageManager : ITradingStorageManager
+public class InstrumentStorageManager : IInstrumentStorageManager
 {
-    private readonly ILogger<TradingStorageManager> _logger;
+    private readonly ILogger<InstrumentStorageManager> _logger;
     private readonly IMongoDbRepository _mongoDbRepository;
 
     [SetsRequiredMembers]
-    public TradingStorageManager(ILogger<TradingStorageManager> logger, IMongoDbRepository mongoDbRepository)
+    public InstrumentStorageManager(ILogger<InstrumentStorageManager> logger, IMongoDbRepository mongoDbRepository)
     {
         _logger = logger;
         _mongoDbRepository = mongoDbRepository;
@@ -20,7 +20,7 @@ public class TradingStorageManager : ITradingStorageManager
     public async Task StartAsync()
     {
         await InitDatabaseStructureAsync();
-        _logger.LogInformation("TradingStorageManager is ready!");
+        _logger.LogInformation("InstrumentStorageManager is ready!");
     }
 
     private async Task InitDatabaseStructureAsync()
@@ -43,21 +43,14 @@ public class TradingStorageManager : ITradingStorageManager
                 }
                 )
             );
-
-
     }
 
-    public Task<QuoteEntityDBO?> SaveQuoteInDatabaseAsync(RealtimeQuote quote)
+    public async Task<InstrumentEntityDBO?> CreateOrUpdateInstrumentAsync(InstrumentDTO instrument)
     {
-        return Task.FromResult<QuoteEntityDBO?>(null);
-    }
 
-    public async Task<InstrumentEntityDBO?> CreateOrUpdateInstrumentInDatabaseAsync(InstrumentDTO instrument)
-    {
         var collection = _mongoDbRepository.GetCollection<InstrumentEntityDBO>("Instruments");
-        var entity = new InstrumentEntityDBO(instrument.Isin);
+        var entity = new InstrumentEntityDBO(instrument.Isin, "asd");
         await collection.InsertOneAsync(entity);
-
         return entity;
     }
 }

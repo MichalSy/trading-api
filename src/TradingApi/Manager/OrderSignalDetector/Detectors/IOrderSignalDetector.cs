@@ -1,7 +1,7 @@
-﻿using TradingApi.Manager.OrderSignalDetector.Models;
+﻿using TradingApi.Manager.Storage.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.OrderSignalDetector.Detectors;
+namespace TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
 
 public interface IOrderSignalDetector
 {

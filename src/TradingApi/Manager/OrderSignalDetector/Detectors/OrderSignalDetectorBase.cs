@@ -1,21 +1,21 @@
-﻿using TradingApi.Communication.Request;
-using TradingApi.Manager.OrderSignalDetector.Models;
+﻿using TradingApi.Manager.Storage.OrderSignal;
+using TradingApi.Manager.Storage.OrderSignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.OrderSignalDetector.Detectors;
+namespace TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
 
 public abstract class OrderSignalDetectorBase : IOrderSignalDetector
 {
-    private readonly ISender _sender;
+    private readonly IOrderSignalManager _orderSignalManager;
 
     public virtual string Name => GetType().Name.Replace("Detector", string.Empty);
 
     public virtual string DisplayName => Name;
 
     [SetsRequiredMembers]
-    public OrderSignalDetectorBase(ISender sender)
+    public OrderSignalDetectorBase(IServiceProvider provider)
     {
-        _sender = sender;
+        _orderSignalManager = provider.GetRequiredService<IOrderSignalManager>();
     }
 
     public async Task StartDetectAsync(OrderSignalDetectorJob orderSignalJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
@@ -30,7 +30,7 @@ public abstract class OrderSignalDetectorBase : IOrderSignalDetector
 
     protected virtual async Task<bool> CanExecuteDetectionAsync(OrderSignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
     {
-        var lastSignal = await _sender.Send(new GetLastOrderSignalForDetectorJobRequest(orderSignalDetectorJob.Id));
+        var lastSignal = await _orderSignalManager.GetLastOrderSignalsForDetectorJobIdAsync(orderSignalDetectorJob.Id);
         if (lastSignal is { })
         {
             // allow only one active signal
@@ -49,7 +49,7 @@ public abstract class OrderSignalDetectorBase : IOrderSignalDetector
 
     protected async Task SendCreaeOrderSignal(OrderSignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote)
     {
-        await _sender.Send(new CreateOrderSignalRequest(orderSignalDetectorJob, lastQuote));
+        await _orderSignalManager.CreateOrderSignalFromDetectorJobAsync(orderSignalDetectorJob, lastQuote);
     }
 
 

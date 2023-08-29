@@ -1,4 +1,4 @@
-﻿namespace TradingApi.Manager.TradingStorage.Models;
+﻿namespace TradingApi.Manager.Storage.InstrumentStorage.Models;
 
 public sealed class InstrumentDTO
 {

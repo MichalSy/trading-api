@@ -6,7 +6,6 @@ using PushTechnology.ClientInterface.Client.Topics.Details;
 using PushTechnology.ClientInterface.Data.JSON;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using TradingApi.Communication.Notification;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Repositories.ZeroRealtime;
@@ -16,13 +15,13 @@ public class ZeroRealtimeRepository
 {
     private readonly PushTechnology.ClientInterface.Client.Session.ISession _session;
     private readonly ILogger<ZeroRealtimeRepository> _logger;
-    private readonly IPublisher _publisher;
+
+    private readonly List<Action<RealtimeQuote>> _subscribers = new();
 
     [SetsRequiredMembers]
-    public ZeroRealtimeRepository(ILogger<ZeroRealtimeRepository> logger, IConfiguration configuration, IPublisher publisher)
+    public ZeroRealtimeRepository(ILogger<ZeroRealtimeRepository> logger, IConfiguration configuration)
     {
         _logger = logger;
-        _publisher = publisher;
         _session = Diffusion.Sessions
             .Principal(configuration["ZERODIF_USER"])
             .Password(configuration["ZERODIF_PASSWORD"])
@@ -45,6 +44,9 @@ public class ZeroRealtimeRepository
         _session.Topics.UnsubscribeAsync($">wp/{isin}");
         return Task.CompletedTask;
     }
+
+    public void SubscribeQuoteChange(Action<RealtimeQuote> action)
+        => _subscribers.Add(action);
 
     public void OnClose() { }
 
@@ -73,7 +75,9 @@ public class ZeroRealtimeRepository
               quote["a"].GetValue<decimal>()
             );
 
-            _publisher.Publish(new RealtimeQuoteReceivedNotification(result));
+
+            foreach (var subscriber in _subscribers)
+                subscriber(result);
         }
     }
 }
