@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Concurrent;
 using TradingApi.Manager.RealtimeQuotes;
 using TradingApi.Manager.Storage.OrderSignal.Models;
 using TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
@@ -11,12 +12,12 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
 {
     private ConcurrentBag<OrderSignalDetectorJob> _loadedJobs = new();
     private readonly Dictionary<string, IOrderSignalDetector> _detectors;
-    private readonly IRealtimeQuotesManager _realtimeQuotesManager;
+    private readonly IServiceProvider _serviceProvider;
 
-    public OrderSignalDetectorManager(IEnumerable<IOrderSignalDetector> detectors, IRealtimeQuotesManager realtimeQuotesManager)
+    public OrderSignalDetectorManager(IEnumerable<IOrderSignalDetector> detectors, IServiceProvider serviceProvider)
     {
-        _realtimeQuotesManager = realtimeQuotesManager;
         _detectors = detectors.ToDictionary(d => d.Name);
+        _serviceProvider = serviceProvider;
     }
 
     public async Task StartAsync()
@@ -55,9 +56,10 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
         });
 
         // register all instruments for realtime quotes
+        var realtimeQuotesManager = _serviceProvider.GetRequiredService<IRealtimeQuotesManager>();
         foreach (var isin in _loadedJobs.Select(j => j.Isin).Distinct())
         {
-            await _realtimeQuotesManager.SubscribeIsinAsync(isin);
+            await realtimeQuotesManager.SubscribeIsinAsync(isin);
         }
     }
 

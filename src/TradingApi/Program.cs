@@ -1,6 +1,7 @@
 using Amazon.CognitoIdentityProvider;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Security.Claims;
 using TradingApi;
 using TradingApi.Authentication;
@@ -10,6 +11,7 @@ using TradingApi.Manager.RealtimeQuotes;
 using TradingApi.Manager.Storage.InstrumentStorage;
 using TradingApi.Manager.Storage.OrderSignal;
 using TradingApi.Manager.Storage.OrderSignalDetector;
+using TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
 using TradingApi.Manager.Storage.TradingStorage;
 using TradingApi.Repositories.MongoDb;
 using TradingApi.Repositories.ZeroApi;
@@ -72,6 +74,12 @@ builder.Services.AddSingleton<IInstrumentStorageManager, InstrumentStorageManage
 builder.Services.AddSingleton<ITradingStorageManager, TradingStorageManager>();
 builder.Services.AddSingleton<IRealtimeQuotesManager, RealtimeQuotesManager>();
 
+
+// Detectors
+// find all classes with interface of IOrderSignalDetector and register as singleton with DepedencyInject without abstract classes
+Assembly.GetExecutingAssembly().GetTypes()
+    .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Contains(typeof(IOrderSignalDetector)))
+    .ToList().ForEach(t => builder.Services.AddSingleton(typeof(IOrderSignalDetector), t));
 
 builder.Services.AddHostedService<StartupService>();
 
