@@ -1,7 +1,7 @@
-﻿using TradingApi.Manager.Storage.InstrumentStorage;
-using TradingApi.Manager.Storage.OrderSignal;
-using TradingApi.Manager.Storage.OrderSignalDetector;
-using TradingApi.Manager.Storage.TradingStorage.Models;
+﻿using TradingApi.Manager.Storage.OrderSignal;
+using TradingApi.Manager.Storage.SignalDetector;
+using TradingApi.Repositories.Storages.Instrument;
+using TradingApi.Repositories.Storages.Instrument.Models;
 using TradingApi.Repositories.ZeroRealtime;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
@@ -11,20 +11,20 @@ public class RealtimeQuotesManager : IRealtimeQuotesManager
 {
     private readonly ILogger<RealtimeQuotesManager> _logger;
     private readonly IZeroRealtimeRepository _zeroRealtimeRepository;
-    private readonly IInstrumentStorageManager _instrumentStorageManager;
+    private readonly IInstrumentStorage _instrumentStorage;
     private readonly IOrderSignalManager _orderSignalManager;
-    private readonly IOrderSignalDetectorManager _orderSignalDetectorManager;
+    private readonly ISignalDetectorManager _orderSignalDetectorManager;
     private readonly Dictionary<string, List<RealtimeQuote>> _cacheQuotes = new();
 
     [SetsRequiredMembers]
     public RealtimeQuotesManager(
         ILogger<RealtimeQuotesManager> logger,
-        IZeroRealtimeRepository zeroRealtimeRepository, 
-        IInstrumentStorageManager instrumentStorageManager,
+        IZeroRealtimeRepository zeroRealtimeRepository,
+        IInstrumentStorage instrumentStorage,
         IOrderSignalManager orderSignalManager,
-        IOrderSignalDetectorManager orderSignalDetectorManager)
+        ISignalDetectorManager orderSignalDetectorManager)
     {
-        _instrumentStorageManager = instrumentStorageManager;
+        _instrumentStorage = instrumentStorage;
         _orderSignalManager = orderSignalManager;
         _orderSignalDetectorManager = orderSignalDetectorManager;
         _logger = logger;
@@ -34,7 +34,7 @@ public class RealtimeQuotesManager : IRealtimeQuotesManager
 
     public async Task SubscribeIsinAsync(string isin)
     {
-        await _instrumentStorageManager.CreateOrUpdateInstrumentAsync(new InstrumentEntityDBO(isin));
+        await _instrumentStorage.CreateOrUpdateInstrumentAsync(new InstrumentEntityDBO { Isin = isin });
         await _zeroRealtimeRepository.SubscribeIsinAsync(isin);
     }
 

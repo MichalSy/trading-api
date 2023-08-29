@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using TradingApi.Manager.Storage.OrderSignal.Models;
-using TradingApi.Manager.Storage.OrderSignalDetector.Models;
+using TradingApi.Manager.Storage.SignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.Storage.OrderSignal;
@@ -23,7 +23,7 @@ public class OrderSignalManager : IOrderSignalManager
         return Task.CompletedTask;
     }
 
-    public async Task<bool> CreateOrderSignalFromDetectorJobAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote)
+    public async Task<bool> CreateOrderSignalFromDetectorJobAsync(SignalDetectorJob detectorJob, RealtimeQuote lastQuote)
     {
         return await BuyStockAsync(detectorJob, lastQuote);
     }
@@ -80,7 +80,7 @@ public class OrderSignalManager : IOrderSignalManager
         }
     }
 
-    private async Task<bool> BuyStockAsync(OrderSignalDetectorJob detectorJob, RealtimeQuote lastQuote)
+    private async Task<bool> BuyStockAsync(SignalDetectorJob detectorJob, RealtimeQuote lastQuote)
     {
         await Task.Delay(0);
 

@@ -1,7 +1,7 @@
-﻿using TradingApi.Manager.Storage.OrderSignalDetector.Models;
+﻿using TradingApi.Manager.Storage.SignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
+namespace TradingApi.Manager.Storage.SignalDetector.Detectors;
 
 public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
 {
@@ -16,7 +16,7 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
         _logger = logger;
     }
 
-    protected override async Task ExecuteDetectionAsync(OrderSignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
+    protected override async Task ExecuteDetectionAsync(SignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
     {
         var windowTime = orderSignalDetectorJob.GetDetectorSettingValue("WindowTimeInSecs", 30);
         var needDifferenceFromStart = orderSignalDetectorJob.GetDetectorSettingValue("BidDifferenceFromWindowStartInPercent", 5f);

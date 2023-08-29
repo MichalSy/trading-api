@@ -1,20 +1,20 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using TradingApi.Manager.Storage.TradingStorage.Models;
 using TradingApi.Repositories.MongoDb;
+using TradingApi.Repositories.Storages.Instrument.Models;
 
-namespace TradingApi.Manager.Storage.InstrumentStorage;
+namespace TradingApi.Repositories.Storages.Instrument;
 
-public class InstrumentStorageManager : IInstrumentStorageManager
+public class InstrumentStorage : IInstrumentStorage
 {
     private readonly string _collectionName = "Instruments";
 
-    private readonly ILogger<InstrumentStorageManager> _logger;
+    private readonly ILogger<InstrumentStorage> _logger;
     private readonly IMongoDbRepository _mongoDbRepository;
     private readonly IMongoCollection<InstrumentEntityDBO> _mongoCollection;
 
     [SetsRequiredMembers]
-    public InstrumentStorageManager(ILogger<InstrumentStorageManager> logger, IMongoDbRepository mongoDbRepository)
+    public InstrumentStorage(ILogger<InstrumentStorage> logger, IMongoDbRepository mongoDbRepository)
     {
         _logger = logger;
         _mongoDbRepository = mongoDbRepository;
@@ -24,7 +24,7 @@ public class InstrumentStorageManager : IInstrumentStorageManager
     public async Task StartAsync()
     {
         await InitDatabaseStructureAsync();
-        _logger.LogInformation("InstrumentStorageManager is ready!");
+        _logger.LogInformation($"{nameof(InstrumentStorage)} is ready!");
     }
 
     private async Task InitDatabaseStructureAsync()
@@ -43,10 +43,10 @@ public class InstrumentStorageManager : IInstrumentStorageManager
             .Indexes
             .CreateOneAsync(new CreateIndexModel<InstrumentEntityDBO>(
                 Builders<InstrumentEntityDBO>.IndexKeys.Ascending(x => x.Isin),
-                new CreateIndexOptions()
-                {
-                    Unique = true
-                }
+                    new CreateIndexOptions()
+                    {
+                        Unique = true
+                    }
                 )
             );
     }
@@ -54,15 +54,12 @@ public class InstrumentStorageManager : IInstrumentStorageManager
     public async Task<InstrumentEntityDBO> CreateOrUpdateInstrumentAsync(InstrumentEntityDBO instrument)
     {
         var loadedEntity = await GetInstrumentAsync(instrument.Isin);
-        var newEntity = new InstrumentEntityDBO(instrument.Isin)
-        {
-            Id = loadedEntity?.Id ?? ObjectId.GenerateNewId()
-        };
+        var newEntity = instrument with { Id = loadedEntity?.Id ?? Guid.NewGuid() };
 
         await _mongoCollection.ReplaceOneAsync(i => i.Isin.Equals(instrument.Isin), newEntity, new ReplaceOptions { IsUpsert = true });
         return newEntity;
     }
 
-    public async Task<InstrumentEntityDBO?> GetInstrumentAsync(string isin) 
+    public async Task<InstrumentEntityDBO?> GetInstrumentAsync(string isin)
         => (await _mongoCollection.FindAsync(i => i.Isin.Equals(isin))).FirstOrDefault();
 }

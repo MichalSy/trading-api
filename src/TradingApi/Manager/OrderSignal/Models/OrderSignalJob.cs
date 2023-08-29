@@ -1,11 +1,11 @@
-﻿using TradingApi.Manager.Storage.OrderSignalDetector.Models;
+﻿using TradingApi.Manager.Storage.SignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.Storage.OrderSignal.Models;
 
 public class OrderSignalJob
 {
-    public required OrderSignalDetectorJob DetectorJob { get; init; }
+    public required SignalDetectorJob DetectorJob { get; init; }
 
     private RealtimeQuote? _buyQuote;
     public RealtimeQuote? BuyQuote => _buyQuote;

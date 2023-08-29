@@ -1,8 +1,8 @@
-﻿using TradingApi.Manager.Storage.TradingStorage.Models;
+﻿using TradingApi.Repositories.Storages.Instrument.Models;
 
-namespace TradingApi.Manager.Storage.InstrumentStorage;
+namespace TradingApi.Repositories.Storages.Instrument;
 
-public interface IInstrumentStorageManager
+public interface IInstrumentStorage
 {
     Task<InstrumentEntityDBO> CreateOrUpdateInstrumentAsync(InstrumentEntityDBO instrument);
     Task<InstrumentEntityDBO?> GetInstrumentAsync(string isin);

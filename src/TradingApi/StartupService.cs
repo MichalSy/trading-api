@@ -1,7 +1,8 @@
-﻿using TradingApi.Manager.Storage.InstrumentStorage;
-using TradingApi.Manager.Storage.OrderSignal;
-using TradingApi.Manager.Storage.OrderSignalDetector;
+﻿using TradingApi.Manager.Storage.OrderSignal;
+using TradingApi.Manager.Storage.SignalDetector;
 using TradingApi.Manager.Storage.TradingStorage;
+using TradingApi.Repositories.Storages.Instrument;
+using TradingApi.Repositories.Storages.SignalDetector;
 
 namespace TradingApi;
 
@@ -9,21 +10,24 @@ public class StartupService : BackgroundService
 {
     private readonly ILogger<StartupService> _logger;
     private readonly ITradingStorageManager _tradingStorageManager;
-    private readonly IInstrumentStorageManager _instrumentStorageManager;
+    private readonly IInstrumentStorage _instrumentStorage;
+    private readonly ISignalDetectorStorage _signalDetectorStorage;
     private readonly IOrderSignalManager _orderSignalManager;
-    private readonly IOrderSignalDetectorManager _orderSignalDetectorManager;
+    private readonly ISignalDetectorManager _orderSignalDetectorManager;
 
     [SetsRequiredMembers]
     public StartupService(
         ILogger<StartupService> logger, 
-        ITradingStorageManager tradingStorageManager, 
-        IInstrumentStorageManager instrumentStorageManager,
+        ITradingStorageManager tradingStorageManager,
+        IInstrumentStorage instrumentStorage,
+        ISignalDetectorStorage signalDetectorStorage,
         IOrderSignalManager orderSignalManager, 
-        IOrderSignalDetectorManager orderSignalDetectorManager)
+        ISignalDetectorManager orderSignalDetectorManager)
     {
         _logger = logger;
         _tradingStorageManager = tradingStorageManager;
-        _instrumentStorageManager = instrumentStorageManager;
+        _instrumentStorage = instrumentStorage;
+        _signalDetectorStorage = signalDetectorStorage;
         _orderSignalManager = orderSignalManager;
         _orderSignalDetectorManager = orderSignalDetectorManager;
     }
@@ -32,7 +36,8 @@ public class StartupService : BackgroundService
     {
         try
         {
-            await _instrumentStorageManager.StartAsync();
+            await _instrumentStorage.StartAsync();
+            await _signalDetectorStorage.StartAsync();
             await _tradingStorageManager.StartAsync();
             await _orderSignalManager.StartAsync(stoppingToken);
             await _orderSignalDetectorManager.StartAsync();

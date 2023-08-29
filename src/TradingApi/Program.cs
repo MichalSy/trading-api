@@ -8,12 +8,13 @@ using TradingApi.Authentication;
 using TradingApi.Endpoints.ZeroApi;
 using TradingApi.Endpoints.ZeroRealtime;
 using TradingApi.Manager.RealtimeQuotes;
-using TradingApi.Manager.Storage.InstrumentStorage;
 using TradingApi.Manager.Storage.OrderSignal;
-using TradingApi.Manager.Storage.OrderSignalDetector;
-using TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
+using TradingApi.Manager.Storage.SignalDetector;
+using TradingApi.Manager.Storage.SignalDetector.Detectors;
 using TradingApi.Manager.Storage.TradingStorage;
 using TradingApi.Repositories.MongoDb;
+using TradingApi.Repositories.Storages.Instrument;
+using TradingApi.Repositories.Storages.SignalDetector;
 using TradingApi.Repositories.ZeroApi;
 using TradingApi.Repositories.ZeroRealtime;
 
@@ -67,10 +68,13 @@ builder.Services.AddSingleton(
 builder.Services.AddScoped<IZeroApiRepository, ZeroApiRepository>();
 builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>();
 
+// Storages
+builder.Services.AddSingleton<IInstrumentStorage, InstrumentStorage>();
+builder.Services.AddSingleton<ISignalDetectorStorage, SignalDetectorStorage>();
+
 // Manager
-builder.Services.AddSingleton<IOrderSignalDetectorManager, OrderSignalDetectorManager>();
+builder.Services.AddSingleton<ISignalDetectorManager, SignalDetectorManager>();
 builder.Services.AddSingleton<IOrderSignalManager, OrderSignalManager>();
-builder.Services.AddSingleton<IInstrumentStorageManager, InstrumentStorageManager>();
 builder.Services.AddSingleton<ITradingStorageManager, TradingStorageManager>();
 builder.Services.AddSingleton<IRealtimeQuotesManager, RealtimeQuotesManager>();
 

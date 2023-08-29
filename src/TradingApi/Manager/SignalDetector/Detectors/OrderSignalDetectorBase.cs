@@ -1,8 +1,8 @@
 ﻿using TradingApi.Manager.Storage.OrderSignal;
-using TradingApi.Manager.Storage.OrderSignalDetector.Models;
+using TradingApi.Manager.Storage.SignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
+namespace TradingApi.Manager.Storage.SignalDetector.Detectors;
 
 public abstract class OrderSignalDetectorBase : IOrderSignalDetector
 {
@@ -18,7 +18,7 @@ public abstract class OrderSignalDetectorBase : IOrderSignalDetector
         _orderSignalManager = provider.GetRequiredService<IOrderSignalManager>();
     }
 
-    public async Task StartDetectAsync(OrderSignalDetectorJob orderSignalJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
+    public async Task StartDetectAsync(SignalDetectorJob orderSignalJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
     {
         if (!await CanExecuteDetectionAsync(orderSignalJob, lastQuote, cachedQuotes))
         {
@@ -28,7 +28,7 @@ public abstract class OrderSignalDetectorBase : IOrderSignalDetector
         await ExecuteDetectionAsync(orderSignalJob, lastQuote, cachedQuotes);
     }
 
-    protected virtual async Task<bool> CanExecuteDetectionAsync(OrderSignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
+    protected virtual async Task<bool> CanExecuteDetectionAsync(SignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
     {
         var lastSignal = await _orderSignalManager.GetLastOrderSignalsForDetectorJobIdAsync(orderSignalDetectorJob.Id);
         if (lastSignal is { })
@@ -45,9 +45,9 @@ public abstract class OrderSignalDetectorBase : IOrderSignalDetector
         return true;
     }
 
-    protected abstract Task ExecuteDetectionAsync(OrderSignalDetectorJob orderSignalJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes);
+    protected abstract Task ExecuteDetectionAsync(SignalDetectorJob orderSignalJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes);
 
-    protected async Task SendCreaeOrderSignal(OrderSignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote)
+    protected async Task SendCreaeOrderSignal(SignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote)
     {
         await _orderSignalManager.CreateOrderSignalFromDetectorJobAsync(orderSignalDetectorJob, lastQuote);
     }

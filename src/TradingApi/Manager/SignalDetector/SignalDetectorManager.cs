@@ -1,43 +1,51 @@
 ﻿using System.Collections.Concurrent;
+using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Manager.RealtimeQuotes;
-using TradingApi.Manager.Storage.OrderSignal.Models;
-using TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
-using TradingApi.Manager.Storage.OrderSignalDetector.Models;
+using TradingApi.Manager.Storage.SignalDetector.Detectors;
+using TradingApi.Manager.Storage.SignalDetector.Models;
+using TradingApi.Repositories.Storages.SignalDetector;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.Storage.OrderSignalDetector;
+namespace TradingApi.Manager.Storage.SignalDetector;
 
-public class OrderSignalDetectorManager : IOrderSignalDetectorManager
+public class SignalDetectorManager : ISignalDetectorManager
 {
-    private ConcurrentBag<OrderSignalDetectorJob> _loadedJobs = new();
+    private ConcurrentBag<SignalDetectorJob> _loadedJobs = new();
     private readonly Dictionary<string, IOrderSignalDetector> _detectors;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ISignalDetectorStorage _signalDetectorStorage;
 
-    public OrderSignalDetectorManager(IEnumerable<IOrderSignalDetector> detectors, IServiceProvider serviceProvider)
+    [SetsRequiredMembers]
+    public SignalDetectorManager(
+        IEnumerable<IOrderSignalDetector> detectors, 
+        IServiceProvider serviceProvider,
+        ISignalDetectorStorage signalDetectorStorage)
     {
         _detectors = detectors.ToDictionary(d => d.Name);
         _serviceProvider = serviceProvider;
+        _signalDetectorStorage = signalDetectorStorage;
     }
 
     public async Task StartAsync()
     {
-        await LoadAllOrderSignalDetectorJobsAsync();
+        await LoadAllSignalDetectorJobsAsync();
 
     }
 
-    private async Task LoadAllOrderSignalDetectorJobsAsync()
+    private async Task LoadAllSignalDetectorJobsAsync()
     {
-        _loadedJobs = new(new OrderSignalDetectorJob[]
+        _loadedJobs = new(new SignalDetectorJob[]
         {
-            new OrderSignalDetectorJob(
-                "US88160R1014",
-                "SimpleSlidingWindow",
-                new()
+            new SignalDetectorJob
+            {
+                Isin = "US88160R1014",
+                DetectorName = "SimpleSlidingWindow",
+                DetectorSettings = new()
                 {
                     { "WindowTimeInSecs", 60 },
                     { "BidDifferenceFromWindowStartInPercent", .15f },
                 },
-                new OrderSignalSettings
+                OrderSignalSettings = new()
                 {
                     BuySettings = new()
                     {
@@ -51,10 +59,22 @@ public class OrderSignalDetectorManager : IOrderSignalDetectorManager
                         DifferenceNegativeInPercent = -0.4m
                     }
                 }
-            )
+            }
         });
 
-        // register all instruments for realtime quotes
+        await SubscribeAllInstrumentsAsync();
+    }
+
+    public async void AddSignalDetectorJobAsync(SignalDetectorJob job)
+    {
+        var newEntity = await _signalDetectorStorage.CreateOrUpdateSignalDetectorAsync(job.ToDBO());
+        _loadedJobs.Add(newEntity.ToDTO());
+
+        await SubscribeAllInstrumentsAsync();
+    }
+
+    private async Task SubscribeAllInstrumentsAsync()
+    {
         var realtimeQuotesManager = _serviceProvider.GetRequiredService<IRealtimeQuotesManager>();
         foreach (var isin in _loadedJobs.Select(j => j.Isin).Distinct())
         {
