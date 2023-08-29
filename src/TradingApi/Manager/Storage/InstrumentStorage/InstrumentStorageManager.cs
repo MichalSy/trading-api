@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using TradingApi.Manager.Storage.InstrumentStorage.Models;
 using TradingApi.Manager.Storage.TradingStorage.Models;
 using TradingApi.Repositories.MongoDb;
 
@@ -8,14 +7,18 @@ namespace TradingApi.Manager.Storage.InstrumentStorage;
 
 public class InstrumentStorageManager : IInstrumentStorageManager
 {
+    private readonly string _collectionName = "Instruments";
+
     private readonly ILogger<InstrumentStorageManager> _logger;
     private readonly IMongoDbRepository _mongoDbRepository;
+    private readonly IMongoCollection<InstrumentEntityDBO> _mongoCollection;
 
     [SetsRequiredMembers]
     public InstrumentStorageManager(ILogger<InstrumentStorageManager> logger, IMongoDbRepository mongoDbRepository)
     {
         _logger = logger;
         _mongoDbRepository = mongoDbRepository;
+        _mongoCollection = _mongoDbRepository.GetCollection<InstrumentEntityDBO>(_collectionName);
     }
 
     public async Task StartAsync()
@@ -29,12 +32,14 @@ public class InstrumentStorageManager : IInstrumentStorageManager
         var database = _mongoDbRepository.GetDatabase();
         var collections = await (await database.ListCollectionNamesAsync()).ToListAsync();
 
-        if (!collections.Contains("Instruments"))
+        // create collection if not exists
+        if (!collections.Contains(_collectionName))
         {
-            await database.CreateCollectionAsync("Instruments");
+            await database.CreateCollectionAsync(_collectionName);
         }
 
-        await database.GetCollection<InstrumentEntityDBO>("Instruments")
+        // create unique index on Isin
+        await database.GetCollection<InstrumentEntityDBO>(_collectionName)
             .Indexes
             .CreateOneAsync(new CreateIndexModel<InstrumentEntityDBO>(
                 Builders<InstrumentEntityDBO>.IndexKeys.Ascending(x => x.Isin),
@@ -46,17 +51,18 @@ public class InstrumentStorageManager : IInstrumentStorageManager
             );
     }
 
-    public async Task<InstrumentEntityDBO?> CreateOrUpdateInstrumentAsync(InstrumentDTO instrument)
+    public async Task<InstrumentEntityDBO> CreateOrUpdateInstrumentAsync(InstrumentEntityDBO instrument)
     {
-        var collection = _mongoDbRepository.GetCollection<InstrumentEntityDBO>("Instruments");
-
-        var loadedEntity = (await collection.FindAsync(i => i.Isin.Equals(instrument.Isin))).FirstOrDefault();
+        var loadedEntity = await GetInstrumentAsync(instrument.Isin);
         var newEntity = new InstrumentEntityDBO(instrument.Isin)
         {
             Id = loadedEntity?.Id ?? ObjectId.GenerateNewId()
         };
 
-        await collection.ReplaceOneAsync(i => i.Isin.Equals(instrument.Isin), newEntity, new ReplaceOptions { IsUpsert = true });
+        await _mongoCollection.ReplaceOneAsync(i => i.Isin.Equals(instrument.Isin), newEntity, new ReplaceOptions { IsUpsert = true });
         return newEntity;
     }
+
+    public async Task<InstrumentEntityDBO?> GetInstrumentAsync(string isin) 
+        => (await _mongoCollection.FindAsync(i => i.Isin.Equals(isin))).FirstOrDefault();
 }

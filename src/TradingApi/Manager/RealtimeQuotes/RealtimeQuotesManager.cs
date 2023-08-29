@@ -1,7 +1,7 @@
 ﻿using TradingApi.Manager.Storage.InstrumentStorage;
-using TradingApi.Manager.Storage.InstrumentStorage.Models;
 using TradingApi.Manager.Storage.OrderSignal;
 using TradingApi.Manager.Storage.OrderSignalDetector;
+using TradingApi.Manager.Storage.TradingStorage.Models;
 using TradingApi.Repositories.ZeroRealtime;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
@@ -34,7 +34,7 @@ public class RealtimeQuotesManager : IRealtimeQuotesManager
 
     public async Task SubscribeIsinAsync(string isin)
     {
-        await _instrumentStorageManager.CreateOrUpdateInstrumentAsync(new InstrumentDTO { Isin = isin });
+        await _instrumentStorageManager.CreateOrUpdateInstrumentAsync(new InstrumentEntityDBO(isin));
         await _zeroRealtimeRepository.SubscribeIsinAsync(isin);
     }
 

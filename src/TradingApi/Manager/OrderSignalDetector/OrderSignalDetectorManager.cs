@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using TradingApi.Manager.RealtimeQuotes;
 using TradingApi.Manager.Storage.OrderSignal.Models;
 using TradingApi.Manager.Storage.OrderSignalDetector.Detectors;
