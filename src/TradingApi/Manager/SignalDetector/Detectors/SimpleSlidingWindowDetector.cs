@@ -18,10 +18,10 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
 
     protected override async Task ExecuteDetectionAsync(SignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes)
     {
-        var windowTime = orderSignalDetectorJob.GetDetectorSettingValue("WindowTimeInSecs", 30);
-        var needDifferenceFromStart = orderSignalDetectorJob.GetDetectorSettingValue("BidDifferenceFromWindowStartInPercent", 5f);
+        var windowTime = orderSignalDetectorJob.GetDetectorSettingValue("WindowTimeInSecs", 30L);
+        var needDifferenceFromStart = orderSignalDetectorJob.GetDetectorSettingValue("BidDifferenceFromWindowStartInPercent", 5m);
 
-        var windowStart = DateTime.UtcNow.AddSeconds(-windowTime);
+        var windowStart = DateTime.UtcNow.AddSeconds(-(double)windowTime);
 
         // get last quote before window
         var lastQuoteBeforeWindow = cachedQuotes?.Where(q => q.Timestamp < windowStart).OrderByDescending(q => q.Timestamp).FirstOrDefault();
@@ -29,7 +29,7 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
         // difference percent bid value between last quote before window and last quote
         if (lastQuoteBeforeWindow is { })
         {
-            var differencePercent = (float)(lastQuote.Bid / lastQuoteBeforeWindow.Bid * 100 - 100);
+            var differencePercent = (lastQuote.Bid / lastQuoteBeforeWindow.Bid * 100 - 100);
             _logger.LogTrace("Start quote: {startQuoteBid} ({startQuoteTimestamp}), Last quote: {lastQuoteBid} ({lastQuoteTimestamp}) -> Difference percent: {differencePercent:N3}",
                 lastQuoteBeforeWindow.Bid,
                 lastQuoteBeforeWindow.Timestamp,

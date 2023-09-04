@@ -23,7 +23,7 @@ public record OrderSignalSellSettingsDBO
     public TimeSpan? MaxDuration { get; init; }
 }
 
-public class OrderSignalBuySettingsDBO
+public record OrderSignalBuySettingsDBO
 {
     public int CoolDownAfterLastSellInSecs { get; init; } = 30;
     public int? StockCount { get; set; }

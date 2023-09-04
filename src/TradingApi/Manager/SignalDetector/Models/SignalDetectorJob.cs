@@ -1,4 +1,5 @@
-﻿using TradingApi.Manager.Storage.OrderSignal.Models;
+﻿using System.Text.Json.Serialization;
+using TradingApi.Manager.Storage.OrderSignal.Models;
 
 namespace TradingApi.Manager.Storage.SignalDetector.Models;
 
@@ -8,6 +9,7 @@ public record SignalDetectorJob
 
     public required string Isin { get; init; }
     public required string DetectorName { get; init; }
+
     public required Dictionary<string, object> DetectorSettings { get; init; }
     public required OrderSignalSettings OrderSignalSettings { get; init; }
 

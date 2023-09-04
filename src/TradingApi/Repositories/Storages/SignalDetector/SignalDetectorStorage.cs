@@ -51,14 +51,17 @@ public class SignalDetectorStorage : ISignalDetectorStorage
         //    );
     }
 
-    public async Task<SignalDetectorEntityDBO> CreateOrUpdateSignalDetectorAsync(SignalDetectorEntityDBO instrument)
+    public async Task<SignalDetectorEntityDBO> CreateOrUpdateSignalDetectorAsync(SignalDetectorEntityDBO signalDetectorEntity)
     {
-        var loadedEntity = await GetSignalDetectorAsync(instrument.Id);
-        var newEntity = instrument with { Id = loadedEntity?.Id ?? Guid.NewGuid() };
+        var loadedEntity = await GetSignalDetectorAsync(signalDetectorEntity.Id);
+        var newEntity = signalDetectorEntity with { Id = loadedEntity?.Id ?? Guid.NewGuid() };
 
         await _mongoCollection.ReplaceOneAsync(i => i.Id == newEntity.Id, newEntity, new ReplaceOptions { IsUpsert = true });
         return newEntity;
     }
+
+    public async Task<IEnumerable<SignalDetectorEntityDBO>?> GetSignalDetectorsAsync()
+        => (await _mongoCollection.FindAsync(_ => true)).ToEnumerable();
 
     public async Task<SignalDetectorEntityDBO?> GetSignalDetectorAsync(Guid id)
         => (await _mongoCollection.FindAsync(i => i.Id == id)).FirstOrDefault();

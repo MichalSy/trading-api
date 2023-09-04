@@ -1,10 +1,14 @@
 using Amazon.CognitoIdentityProvider;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using TradingApi;
 using TradingApi.Authentication;
+using TradingApi.Converters;
+using TradingApi.Endpoints.SignalDetector;
 using TradingApi.Endpoints.ZeroApi;
 using TradingApi.Endpoints.ZeroRealtime;
 using TradingApi.Manager.RealtimeQuotes;
@@ -49,6 +53,13 @@ builder.Services.AddSwaggerGen(o =>
             new List<string>()
         }
     });
+});
+
+// Set the JSON serializer options
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.SerializerOptions.Converters.Add(new DictionaryStringObjectJsonConverter());
 });
 
 builder.Services.AddHttpClient();
@@ -100,6 +111,7 @@ app.UseAuthorization();
 
 app.MapZeroEndpoints();
 app.MapZeroRealtimeEndpoints();
+app.MapSignalDetectorEndpoints();
 
 app.Run();
 

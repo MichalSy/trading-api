@@ -6,5 +6,6 @@ public interface ISignalDetectorStorage
 {
     Task<SignalDetectorEntityDBO> CreateOrUpdateSignalDetectorAsync(SignalDetectorEntityDBO instrument);
     Task<SignalDetectorEntityDBO?> GetSignalDetectorAsync(Guid id);
+    Task<IEnumerable<SignalDetectorEntityDBO>?> GetSignalDetectorsAsync();
     Task StartAsync();
 }

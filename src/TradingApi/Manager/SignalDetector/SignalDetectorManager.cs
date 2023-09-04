@@ -34,33 +34,11 @@ public class SignalDetectorManager : ISignalDetectorManager
 
     private async Task LoadAllSignalDetectorJobsAsync()
     {
-        _loadedJobs = new(new SignalDetectorJob[]
-        {
-            new SignalDetectorJob
-            {
-                Isin = "US88160R1014",
-                DetectorName = "SimpleSlidingWindow",
-                DetectorSettings = new()
-                {
-                    { "WindowTimeInSecs", 60 },
-                    { "BidDifferenceFromWindowStartInPercent", .15f },
-                },
-                OrderSignalSettings = new()
-                {
-                    BuySettings = new()
-                    {
-                        ValueInEur = 500,
-                        RoundUpValueInEur = true,
-                        CoolDownAfterLastSellInSecs = 40
-                    },
-                    SellSettings = new()
-                    {
-                        DifferencePositiveInPercent = 0.7m,
-                        DifferenceNegativeInPercent = -0.4m
-                    }
-                }
-            }
-        });
+        var dbData = (await _signalDetectorStorage.GetSignalDetectorsAsync())?.Select(i => i.ToDTO());
+        if (dbData is null)
+            return;
+
+        _loadedJobs = new ConcurrentBag<SignalDetectorJob>(dbData);
 
         await SubscribeAllInstrumentsAsync();
     }
