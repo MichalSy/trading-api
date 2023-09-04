@@ -38,17 +38,14 @@ public class SignalDetectorStorage : ISignalDetectorStorage
             await database.CreateCollectionAsync(_collectionName);
         }
 
-        //// create unique index on Isin
-        //await database.GetCollection<InstrumentEntityDBO>(_collectionName)
-        //    .Indexes
-        //    .CreateOneAsync(new CreateIndexModel<InstrumentEntityDBO>(
-        //        Builders<InstrumentEntityDBO>.IndexKeys.Ascending(x => x.Isin),
-        //            new CreateIndexOptions()
-        //            {
-        //                Unique = true
-        //            }
-        //        )
-        //    );
+        // create unique index on Isin
+        var indexes = database.GetCollection<SignalDetectorEntityDBO>(_collectionName).Indexes;
+        await indexes.CreateOneAsync(new CreateIndexModel<SignalDetectorEntityDBO>(
+            Builders<SignalDetectorEntityDBO>.IndexKeys.Ascending(x => x.Isin), null)
+        );
+        await indexes.CreateOneAsync(new CreateIndexModel<SignalDetectorEntityDBO>(
+            Builders<SignalDetectorEntityDBO>.IndexKeys.Ascending(x => x.DetectorName), null)
+        );
     }
 
     public async Task<SignalDetectorEntityDBO> CreateOrUpdateSignalDetectorAsync(SignalDetectorEntityDBO signalDetectorEntity)

@@ -47,7 +47,7 @@ public abstract class OrderSignalDetectorBase : IOrderSignalDetector
 
     protected abstract Task ExecuteDetectionAsync(SignalDetectorJob orderSignalJob, RealtimeQuote lastQuote, IEnumerable<RealtimeQuote>? cachedQuotes);
 
-    protected async Task SendCreaeOrderSignal(SignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote)
+    protected async Task SendCreateOrderSignal(SignalDetectorJob orderSignalDetectorJob, RealtimeQuote lastQuote)
     {
         await _orderSignalManager.CreateOrderSignalFromDetectorJobAsync(orderSignalDetectorJob, lastQuote);
     }

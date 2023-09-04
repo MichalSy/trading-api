@@ -42,7 +42,7 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
                 return;
 
             // create new signal :)
-            await SendCreaeOrderSignal(orderSignalDetectorJob, lastQuote);
+            await SendCreateOrderSignal(orderSignalDetectorJob, lastQuote);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using TradingApi.Repositories.MongoDb.Models;
+﻿using MongoDB.Bson.Serialization.Conventions;
+using TradingApi.Repositories.MongoDb.Models;
 
 namespace TradingApi.Repositories.MongoDb;
 
@@ -13,6 +14,14 @@ public static class MongoDbExtensions
 
     public static IServiceCollection AddMongoDb(this IServiceCollection services)
     {
+        // don't save null values
+        ConventionRegistry.Register("IgnoreIfDefault",
+            new ConventionPack
+            {
+                new IgnoreIfDefaultConvention(true)
+            },
+            _ => true);
+
         var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
         services.AddMongoDb(c =>
         {
