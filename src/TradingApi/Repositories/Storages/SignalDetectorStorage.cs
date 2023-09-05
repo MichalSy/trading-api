@@ -1,9 +1,8 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using TradingApi.Repositories.MongoDb;
-using TradingApi.Repositories.Storages.SignalDetector.Models;
+using TradingApi.Repositories.Storages.Models;
 
-namespace TradingApi.Repositories.Storages.SignalDetector;
+namespace TradingApi.Repositories.Storages;
 
 public class SignalDetectorStorage : ISignalDetectorStorage
 {
@@ -38,13 +37,12 @@ public class SignalDetectorStorage : ISignalDetectorStorage
             await database.CreateCollectionAsync(_collectionName);
         }
 
-        // create unique index on Isin
+        // create indexes
         var indexes = database.GetCollection<SignalDetectorEntityDBO>(_collectionName).Indexes;
-        await indexes.CreateOneAsync(new CreateIndexModel<SignalDetectorEntityDBO>(
-            Builders<SignalDetectorEntityDBO>.IndexKeys.Ascending(x => x.Isin), null)
-        );
-        await indexes.CreateOneAsync(new CreateIndexModel<SignalDetectorEntityDBO>(
-            Builders<SignalDetectorEntityDBO>.IndexKeys.Ascending(x => x.DetectorName), null)
+        await indexes.CreateManyAsync(new[] {
+                new CreateIndexModel<SignalDetectorEntityDBO>(Builders<SignalDetectorEntityDBO>.IndexKeys.Ascending(x => x.Isin), null),
+                new CreateIndexModel<SignalDetectorEntityDBO>(Builders<SignalDetectorEntityDBO>.IndexKeys.Ascending(x => x.DetectorName), null)
+            }
         );
     }
 

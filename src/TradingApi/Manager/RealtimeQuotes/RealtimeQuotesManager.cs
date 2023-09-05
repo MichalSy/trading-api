@@ -1,7 +1,7 @@
 ﻿using TradingApi.Manager.Storage.OrderSignal;
 using TradingApi.Manager.Storage.SignalDetector;
-using TradingApi.Repositories.Storages.Instrument;
-using TradingApi.Repositories.Storages.Instrument.Models;
+using TradingApi.Repositories.Storages;
+using TradingApi.Repositories.Storages.Models;
 using TradingApi.Repositories.ZeroRealtime;
 using TradingApi.Repositories.ZeroRealtime.Models;
 

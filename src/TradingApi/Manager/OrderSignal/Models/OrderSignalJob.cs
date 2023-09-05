@@ -5,33 +5,27 @@ namespace TradingApi.Manager.Storage.OrderSignal.Models;
 
 public class OrderSignalJob
 {
-    public required SignalDetectorJob DetectorJob { get; init; }
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public required Guid DetectorJobId { get; init; }
+    public required OrderSignalBuySettings BuySettings { get; init; }
+    public required OrderSignalSellSettings SellSettings { get; init; }
+    public required string Isin { get; init; }
 
-    private RealtimeQuote? _buyQuote;
-    public RealtimeQuote? BuyQuote => _buyQuote;
-
-    private int? _buyedStockCount = 0;
-    public int? BuyedStockCount => _buyedStockCount;
+    public required RealtimeQuote BuyQuote { get; init; }
+    public required int StockCount { get; init; }
 
     private RealtimeQuote? _sellQuote;
     public RealtimeQuote? SellQuote => _sellQuote;
-
-    public string Isin => DetectorJob.Isin;
 
     public DateTime CreatedDate { get; } = DateTime.UtcNow;
 
     private DateTime? _closedDate;
     public DateTime? ClosedDate => _closedDate;
 
-    
+
 
     public bool IsClosed => _closedDate is { };
 
-    public void BuyStockCount(RealtimeQuote realtimeQuote, int stockCount = 1)
-    {
-        _buyQuote = realtimeQuote;
-        _buyedStockCount = stockCount;
-    }
 
     public void SellStockAmount(RealtimeQuote realtimeQuote)
     {

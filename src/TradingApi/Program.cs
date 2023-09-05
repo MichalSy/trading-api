@@ -17,8 +17,7 @@ using TradingApi.Manager.Storage.SignalDetector;
 using TradingApi.Manager.Storage.SignalDetector.Detectors;
 using TradingApi.Manager.Storage.TradingStorage;
 using TradingApi.Repositories.MongoDb;
-using TradingApi.Repositories.Storages.Instrument;
-using TradingApi.Repositories.Storages.SignalDetector;
+using TradingApi.Repositories.Storages;
 using TradingApi.Repositories.ZeroApi;
 using TradingApi.Repositories.ZeroRealtime;
 
@@ -82,6 +81,7 @@ builder.Services.AddSingleton<IZeroRealtimeRepository, ZeroRealtimeRepository>()
 // Storages
 builder.Services.AddSingleton<IInstrumentStorage, InstrumentStorage>();
 builder.Services.AddSingleton<ISignalDetectorStorage, SignalDetectorStorage>();
+builder.Services.AddSingleton<IOrderSignalStorage, OrderSignalStorage>();
 
 // Manager
 builder.Services.AddSingleton<ISignalDetectorManager, SignalDetectorManager>();

@@ -1,6 +1,6 @@
 ﻿using TradingApi.Repositories.MongoDb.Models;
 
-namespace TradingApi.Repositories.Storages.Instrument.Models;
+namespace TradingApi.Repositories.Storages.Models;
 
 public record InstrumentEntityDBO : EntityDBO
 {

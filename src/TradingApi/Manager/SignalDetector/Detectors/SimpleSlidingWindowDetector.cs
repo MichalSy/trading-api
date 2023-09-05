@@ -1,7 +1,8 @@
-﻿using TradingApi.Manager.Storage.SignalDetector.Models;
+﻿using TradingApi.Manager.Storage.SignalDetector.Detectors;
+using TradingApi.Manager.Storage.SignalDetector.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
-namespace TradingApi.Manager.Storage.SignalDetector.Detectors;
+namespace TradingApi.Manager.SignalDetector.Detectors;
 
 public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
 {
@@ -29,7 +30,7 @@ public class SimpleSlidingWindowDetector : OrderSignalDetectorBase
         // difference percent bid value between last quote before window and last quote
         if (lastQuoteBeforeWindow is { })
         {
-            var differencePercent = (lastQuote.Bid / lastQuoteBeforeWindow.Bid * 100 - 100);
+            var differencePercent = lastQuote.Bid / lastQuoteBeforeWindow.Bid * 100 - 100;
             _logger.LogTrace("Start quote: {startQuoteBid} ({startQuoteTimestamp}), Last quote: {lastQuoteBid} ({lastQuoteTimestamp}) -> Difference percent: {differencePercent:N3}",
                 lastQuoteBeforeWindow.Bid,
                 lastQuoteBeforeWindow.Timestamp,

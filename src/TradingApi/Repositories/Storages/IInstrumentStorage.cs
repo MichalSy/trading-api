@@ -1,6 +1,6 @@
-﻿using TradingApi.Repositories.Storages.Instrument.Models;
+﻿using TradingApi.Repositories.Storages.Models;
 
-namespace TradingApi.Repositories.Storages.Instrument;
+namespace TradingApi.Repositories.Storages;
 
 public interface IInstrumentStorage
 {

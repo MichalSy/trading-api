@@ -1,6 +1,6 @@
-﻿using TradingApi.Repositories.Storages.SignalDetector.Models;
+﻿using TradingApi.Repositories.Storages.Models;
 
-namespace TradingApi.Repositories.Storages.SignalDetector;
+namespace TradingApi.Repositories.Storages;
 
 public interface ISignalDetectorStorage
 {

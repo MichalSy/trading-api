@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
+using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Manager.Storage.OrderSignal.Models;
 using TradingApi.Manager.Storage.SignalDetector.Models;
+using TradingApi.Repositories.Storages;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.Storage.OrderSignal;
@@ -9,11 +11,13 @@ public class OrderSignalManager : IOrderSignalManager
 {
     private ConcurrentBag<OrderSignalJob> _orderSignals = new();
     private readonly ILogger<OrderSignalManager> _logger;
+    private readonly IOrderSignalStorage _orderSignalStorage;
 
     [SetsRequiredMembers]
-    public OrderSignalManager(ILogger<OrderSignalManager> logger)
+    public OrderSignalManager(ILogger<OrderSignalManager> logger, IOrderSignalStorage orderSignalStorage)
     {
         _logger = logger;
+        _orderSignalStorage = orderSignalStorage;
     }
 
     public Task StartAsync(CancellationToken stoppingToken)
@@ -30,7 +34,7 @@ public class OrderSignalManager : IOrderSignalManager
 
     public Task<OrderSignalJob?> GetLastOrderSignalsForDetectorJobIdAsync(Guid detectorJobid)
     {
-        return Task.FromResult(_orderSignals.Where(o => o.DetectorJob.Id.Equals(detectorJobid)).OrderByDescending(o => o.CreatedDate).FirstOrDefault());
+        return Task.FromResult(_orderSignals.Where(o => o.DetectorJobId.Equals(detectorJobid)).OrderByDescending(o => o.CreatedDate).FirstOrDefault());
     }
 
     public async Task UpdateOrderSignalsAsync(RealtimeQuote lastQuote)
@@ -47,7 +51,7 @@ public class OrderSignalManager : IOrderSignalManager
 
     private async Task CleanupClosedJobsIntervalTask(CancellationToken stoppingToken)
     {
-        while(!stoppingToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested)
         {
             // cleanup all closed jobs
             _orderSignals = new ConcurrentBag<OrderSignalJob>(_orderSignals.Where(o => !o.IsClosed));
@@ -63,17 +67,17 @@ public class OrderSignalManager : IOrderSignalManager
         // check if positive difference are greater 
         var differenceBuyPriceAndLastBidPrice = lastQuote.Bid / signalJob.BuyQuote.Ask * 100 - 100;
         _logger.LogTrace("Difference between BuyAskPrice ({BuyAskPrice}) and LastBidPrice ({LastBidPrice}), Diff: {differenceBuyPriceAndLastBidPrices:N3}",
-                               signalJob.BuyQuote.Ask, 
-                               lastQuote.Bid, 
+                               signalJob.BuyQuote.Ask,
+                               lastQuote.Bid,
                                differenceBuyPriceAndLastBidPrice);
 
-        if (differenceBuyPriceAndLastBidPrice > signalJob.DetectorJob.OrderSignalSettings.SellSettings.DifferencePositiveInPercent)
+        if (differenceBuyPriceAndLastBidPrice > signalJob.SellSettings.DifferencePositiveInPercent)
         {
             await SellStockAsync(signalJob, lastQuote);
             return;
         }
 
-        if (differenceBuyPriceAndLastBidPrice < signalJob.DetectorJob.OrderSignalSettings.SellSettings.DifferenceNegativeInPercent)
+        if (differenceBuyPriceAndLastBidPrice < signalJob.SellSettings.DifferenceNegativeInPercent)
         {
             await SellStockAsync(signalJob, lastQuote);
             return;
@@ -82,8 +86,6 @@ public class OrderSignalManager : IOrderSignalManager
 
     private async Task<bool> BuyStockAsync(SignalDetectorJob detectorJob, RealtimeQuote lastQuote)
     {
-        await Task.Delay(0);
-
         var stockAmount = 0;
         if (detectorJob.OrderSignalSettings.BuySettings.ValueInEur >= 0)
         {
@@ -100,33 +102,35 @@ public class OrderSignalManager : IOrderSignalManager
         if (stockAmount <= 0)
             return false;
 
+
         var newJob = new OrderSignalJob
         {
-            DetectorJob = detectorJob
+            Isin = detectorJob.Isin,
+            DetectorJobId = detectorJob.Id,
+            BuySettings = detectorJob.OrderSignalSettings.BuySettings,
+            SellSettings = detectorJob.OrderSignalSettings.SellSettings,
+            BuyQuote = lastQuote,
+            StockCount = stockAmount
         };
-        newJob.BuyStockCount(lastQuote, stockAmount);
+
+        await _orderSignalStorage.CreateOrUpdateOrderSignalAsync(newJob.ToDBO());
 
         _orderSignals.Add(newJob);
-
         _logger.LogInformation("Buy {StockCount} x {BuyPrice:N2}€ = {TotalValue:N2}€", stockAmount, lastQuote.Ask, stockAmount * lastQuote.Ask);
         return true;
     }
 
-    private Task SellStockAsync(OrderSignalJob signalJob, RealtimeQuote lastQuote)
+    private async Task SellStockAsync(OrderSignalJob signalJob, RealtimeQuote lastQuote)
     {
-        if (signalJob.BuyQuote is null || signalJob.BuyedStockCount is null)
-            return Task.CompletedTask;
-
-        //_logger.LogInformation("Verkaufen {a}, kaufen {b}", lastQuote.Bid * signalJob.BuyedStockCount.Value, signalJob.BuyQuote.Ask * signalJob.BuyedStockCount.Value);
-        var diffValue = (lastQuote.Bid * signalJob.BuyedStockCount.Value) - (signalJob.BuyQuote.Ask * signalJob.BuyedStockCount.Value);
-        _logger.LogInformation("Sell {StockCount} x {SellPrice:N2}€ = {TotalValue:N2}€, Result: {diffValue:N2}€", 
-            signalJob.BuyedStockCount, 
-            lastQuote.Bid, 
-            signalJob.BuyedStockCount * lastQuote.Bid, 
-            diffValue);
+        var diffValue = (lastQuote.Bid * signalJob.StockCount) - (signalJob.BuyQuote.Ask * signalJob.StockCount);
 
         signalJob.SellStockAmount(lastQuote);
+        await _orderSignalStorage.CreateOrUpdateOrderSignalAsync(signalJob.ToDBO());
 
-        return Task.CompletedTask;
+        _logger.LogInformation("Sell {StockCount} x {SellPrice:N2}€ = {TotalValue:N2}€, Result: {diffValue:N2}€",
+            signalJob.StockCount,
+            lastQuote.Bid,
+            signalJob.StockCount * lastQuote.Bid,
+            diffValue);
     }
 }

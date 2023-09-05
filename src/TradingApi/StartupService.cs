@@ -1,8 +1,7 @@
 ﻿using TradingApi.Manager.Storage.OrderSignal;
 using TradingApi.Manager.Storage.SignalDetector;
 using TradingApi.Manager.Storage.TradingStorage;
-using TradingApi.Repositories.Storages.Instrument;
-using TradingApi.Repositories.Storages.SignalDetector;
+using TradingApi.Repositories.Storages;
 
 namespace TradingApi;
 

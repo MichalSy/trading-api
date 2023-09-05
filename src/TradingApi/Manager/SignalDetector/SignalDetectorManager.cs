@@ -3,7 +3,7 @@ using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Manager.RealtimeQuotes;
 using TradingApi.Manager.Storage.SignalDetector.Detectors;
 using TradingApi.Manager.Storage.SignalDetector.Models;
-using TradingApi.Repositories.Storages.SignalDetector;
+using TradingApi.Repositories.Storages;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.Storage.SignalDetector;
