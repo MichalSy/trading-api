@@ -1,5 +1,4 @@
-﻿using TradingApi.Manager.Storage.SignalDetector.Models;
-using TradingApi.Repositories.ZeroRealtime.Models;
+﻿using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.Storage.OrderSignal.Models;
 
@@ -15,9 +14,14 @@ public class OrderSignalJob
     public required int StockCount { get; init; }
 
     private RealtimeQuote? _sellQuote;
-    public RealtimeQuote? SellQuote => _sellQuote;
+    public RealtimeQuote? SellQuote
+    {
+        get => _sellQuote;
+        init => _sellQuote = value;
+    }
 
-    public DateTime CreatedDate { get; } = DateTime.UtcNow;
+
+    public DateTime CreatedDate { get; init; } = DateTime.UtcNow;
 
     private DateTime? _closedDate;
     public DateTime? ClosedDate => _closedDate;
@@ -26,10 +30,27 @@ public class OrderSignalJob
 
     public bool IsClosed => _closedDate is { };
 
+    public required decimal TotalBuyValueInEur { get; init; }
+
+    private decimal? _totalSellValueInEur;
+    public decimal? TotalSellValueInEur
+    {
+        get => _totalSellValueInEur;
+        init => _totalSellValueInEur = value;
+    }
+
+    private decimal? _totalProfitInEur;
+    public decimal? TotalProfitInEur
+    {
+        get => _totalProfitInEur;
+        init => _totalProfitInEur = value;
+    }
 
     public void SellStockAmount(RealtimeQuote realtimeQuote)
     {
         _sellQuote = realtimeQuote;
+        _totalSellValueInEur = realtimeQuote.Bid * StockCount;
+        _totalProfitInEur = _totalSellValueInEur - TotalBuyValueInEur;
         _closedDate = DateTime.UtcNow;
     }
 }

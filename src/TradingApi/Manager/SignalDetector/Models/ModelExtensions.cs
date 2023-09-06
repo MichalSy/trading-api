@@ -72,6 +72,17 @@ public static class ModelExtensions
         };
     }
 
+    public static RealtimeQuote ToDTO(this RealtimeQuoteDBO dbo)
+    {
+        return new RealtimeQuote
+        {
+            Ask = dbo.Ask,
+            Bid = dbo.Bid,
+            Isin = dbo.Isin,
+            Timestamp = dbo.Timestamp
+        };
+    }
+
     public static OrderSignalEntityDBO ToDBO(this OrderSignalJob dto)
     {
         return new OrderSignalEntityDBO
@@ -95,7 +106,40 @@ public static class ModelExtensions
                 DifferencePositiveInPercent = dto.SellSettings.DifferencePositiveInPercent,
                 MaxDuration = dto.SellSettings.MaxDuration
             },
-            SellQuote = dto.SellQuote?.ToDBO()
+            SellQuote = dto.SellQuote?.ToDBO(),
+            TotalBuyValueInEur = dto.TotalBuyValueInEur,
+            TotalSellValueInEur = dto.TotalSellValueInEur,
+            TotalProfitInEur = dto.TotalProfitInEur,
+        };
+    }
+
+    public static OrderSignalJob ToDTO(this OrderSignalEntityDBO dbo)
+    {
+        return new OrderSignalJob
+        {
+            Id = dbo.Id,
+            CreatedDate = dbo.CreatedDate,
+            DetectorJobId = dbo.DetectorJobId,
+            Isin = dbo.Isin,
+            StockCount = dbo.StockCount,
+            BuySettings = new OrderSignalBuySettings
+            {
+                CoolDownAfterLastSellInSecs = dbo.BuySettings.CoolDownAfterLastSellInSecs,
+                RoundUpValueInEur = dbo.BuySettings.RoundUpValueInEur,
+                StockCount = dbo.BuySettings.StockCount,
+                ValueInEur = dbo.BuySettings.ValueInEur
+            },
+            BuyQuote = dbo.BuyQuote.ToDTO(),
+            SellSettings = new OrderSignalSellSettings
+            {
+                DifferenceNegativeInPercent = dbo.SellSettings.DifferenceNegativeInPercent,
+                DifferencePositiveInPercent = dbo.SellSettings.DifferencePositiveInPercent,
+                MaxDuration = dbo.SellSettings.MaxDuration
+            },
+            SellQuote = dbo.SellQuote?.ToDTO(),
+            TotalBuyValueInEur = dbo.TotalBuyValueInEur,
+            TotalSellValueInEur = dbo.TotalSellValueInEur,
+            TotalProfitInEur = dbo.TotalProfitInEur,
         };
     }
 }

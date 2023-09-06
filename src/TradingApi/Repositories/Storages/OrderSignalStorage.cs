@@ -51,7 +51,7 @@ public class OrderSignalStorage : IOrderSignalStorage
         _logger.LogInformation($"CreateOrUpdateOrderSignalAsync: {orderSignalDBO.Id}");
         var loadedEntity = await GetOrderSignalAsync(orderSignalDBO.Id);
         _logger.LogInformation($"Loaded Entity: {loadedEntity?.Id}");
-        var newEntity = orderSignalDBO with { Id = loadedEntity?.Id ?? orderSignalDBO.Id };
+        var newEntity = orderSignalDBO with { Id = loadedEntity?.Id ?? Guid.NewGuid() };
 
         await _mongoCollection.ReplaceOneAsync(i => i.Id == newEntity.Id, newEntity, new ReplaceOptions { IsUpsert = true });
         return newEntity;

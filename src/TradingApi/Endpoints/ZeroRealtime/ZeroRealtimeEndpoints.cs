@@ -22,12 +22,13 @@ public static class ZeroRealtimeEndpoints
 
         group.MapPost("/simulate-quote", (IRealtimeQuotesManager realtimeQuotesManager, [FromBody] SimulateQuoteRequest request) =>
         {
-            realtimeQuotesManager.RealtimeQuoteChangedReceived(new RealtimeQuote(
-                request.Isin,
-                request.Timestamp,
-                request.Bid,
-                request.Ask
-            ));
+            realtimeQuotesManager.RealtimeQuoteChangedReceived(new RealtimeQuote
+            {
+                Isin = request.Isin,
+                Timestamp = request.Timestamp,
+                Bid = request.Bid,
+                Ask = request.Ask
+            });
         }).AllowAnonymous();
     }
 }

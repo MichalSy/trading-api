@@ -1,8 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using MongoDB.Bson;
 using TradingApi.Manager.OrderSignalDetector.Models;
 using TradingApi.Manager.Storage.OrderSignal.Models;
 using TradingApi.Manager.Storage.SignalDetector.Models;
 using TradingApi.Repositories.Storages;
+using TradingApi.Repositories.Storages.Models;
 using TradingApi.Repositories.ZeroRealtime.Models;
 
 namespace TradingApi.Manager.Storage.OrderSignal;
@@ -20,11 +22,20 @@ public class OrderSignalManager : IOrderSignalManager
         _orderSignalStorage = orderSignalStorage;
     }
 
-    public Task StartAsync(CancellationToken stoppingToken)
+    public async Task StartAsync(CancellationToken stoppingToken)
     {
         _ = CleanupClosedJobsIntervalTask(stoppingToken);
 
-        return Task.CompletedTask;
+        await LoadAllOrderSignalsFromDatabaseAsync();
+    }
+
+    private async Task LoadAllOrderSignalsFromDatabaseAsync()
+    {
+        var dbData = (await _orderSignalStorage.GetOrderSignalsAsync())?.Select(i => i.ToDTO());
+        if (dbData is null)
+            return;
+
+        _orderSignals = new ConcurrentBag<OrderSignalJob>(dbData);
     }
 
     public async Task<bool> CreateOrderSignalFromDetectorJobAsync(SignalDetectorJob detectorJob, RealtimeQuote lastQuote)
@@ -102,20 +113,31 @@ public class OrderSignalManager : IOrderSignalManager
         if (stockAmount <= 0)
             return false;
 
-
-        var newJob = new OrderSignalJob
+        var newOrderSignalDBO =  new OrderSignalEntityDBO
         {
-            Isin = detectorJob.Isin,
             DetectorJobId = detectorJob.Id,
-            BuySettings = detectorJob.OrderSignalSettings.BuySettings,
-            SellSettings = detectorJob.OrderSignalSettings.SellSettings,
-            BuyQuote = lastQuote,
-            StockCount = stockAmount
+            Isin = detectorJob.Isin,
+            StockCount = stockAmount,
+            BuySettings = new OrderSignalBuySettingsDBO
+            {
+                CoolDownAfterLastSellInSecs = detectorJob.OrderSignalSettings.BuySettings.CoolDownAfterLastSellInSecs,
+                RoundUpValueInEur = detectorJob.OrderSignalSettings.BuySettings.RoundUpValueInEur,
+                StockCount = detectorJob.OrderSignalSettings.BuySettings.StockCount,
+                ValueInEur = detectorJob.OrderSignalSettings.BuySettings.ValueInEur
+            },
+            BuyQuote = lastQuote.ToDBO(),
+            SellSettings = new OrderSignalSellSettingsDBO
+            {
+                DifferenceNegativeInPercent = detectorJob.OrderSignalSettings.SellSettings.DifferenceNegativeInPercent,
+                DifferencePositiveInPercent = detectorJob.OrderSignalSettings.SellSettings.DifferencePositiveInPercent,
+                MaxDuration = detectorJob.OrderSignalSettings.SellSettings.MaxDuration
+            },
+            TotalBuyValueInEur = stockAmount * lastQuote.Ask
         };
 
-        await _orderSignalStorage.CreateOrUpdateOrderSignalAsync(newJob.ToDBO());
+        var newJobDBO = await _orderSignalStorage.CreateOrUpdateOrderSignalAsync(newOrderSignalDBO);
+        _orderSignals.Add(newJobDBO.ToDTO());
 
-        _orderSignals.Add(newJob);
         _logger.LogInformation("Buy {StockCount} x {BuyPrice:N2}€ = {TotalValue:N2}€", stockAmount, lastQuote.Ask, stockAmount * lastQuote.Ask);
         return true;
     }

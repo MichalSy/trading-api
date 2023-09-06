@@ -68,13 +68,12 @@ public class ZeroRealtimeRepository
         if (quote is { })
         {
             var result = new RealtimeQuote
-            (
-              quote["i"].GetValue<string>(),
-              DateTimeOffset.FromUnixTimeMilliseconds(quote["t"].GetValue<long>()).UtcDateTime,
-              quote["b"].GetValue<decimal>(),
-              quote["a"].GetValue<decimal>()
-            );
-
+            {
+                Isin = quote["i"].GetValue<string>(),
+                Timestamp = DateTimeOffset.FromUnixTimeMilliseconds(quote["t"].GetValue<long>()).UtcDateTime,
+                Bid = quote["b"].GetValue<decimal>(),
+                Ask = quote["a"].GetValue<decimal>()
+            };
 
             foreach (var subscriber in _subscribers)
                 subscriber(result);
